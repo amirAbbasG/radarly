@@ -23,7 +23,7 @@ Use Tailwind classes referencing these tokens. Never hardcode hex/oklch values i
 |-------|---------------|-------|------|-------|
 | `--primary` | `bg-primary` `text-primary` | `oklch(0.55 0.2 245)` | `oklch(0.65 0.2 245)` | CTAs, active states, key actions |
 | `--primary-fg` | `text-primary-foreground` | white | near-black | Text on primary backgrounds |
-| `--secondary` | `bg-secondary` `text-secondary` | `oklch(0.55 0.15 260)` | `oklch(0.6 0.15 260)` | Category badges, secondary actions |
+| `--secondary` | `bg-secondary` `text-secondary` | `oklch(0.55 0.15 160)` | `oklch(0.6 0.15 160)` | Category badges, secondary actions — radar green |
 | `--accent` | `bg-accent` `text-accent` | `oklch(0.72 0.17 65)` | `oklch(0.78 0.17 65)` | "New" badges, highlights, warm pop |
 | `--accent-fg` | `text-accent-foreground` | near-black | near-black | Text on accent backgrounds |
 | `--success` | `bg-success` `text-success` | `oklch(0.65 0.19 155)` | `oklch(0.72 0.19 155)` | Positive trends, scores >= 90 |
@@ -40,7 +40,7 @@ Use Tailwind classes referencing these tokens. Never hardcode hex/oklch values i
 
 ### Color palette (single accent rule)
 
-Primary = electric blue. Accent = amber/gold. That's it. No other saturated hues.
+Primary = electric blue. Secondary = radar green. Accent = amber/gold.
 If you need a status color: `success` (green), `warning` (amber), `destructive` (red).
 
 ---
