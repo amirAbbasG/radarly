@@ -17,35 +17,7 @@
         "-y",
         "@magicuidesign/mcp@latest"
       ]
-    },
-    "21st": {
-      "type": "remote",
-      "url": "https://21st.dev/api/mcp",
-      "enabled": true,
-      "headers": {
-        "x-api-key": "21st_sk_13a31d7fddf4f16c75063633d5ad8a0c9feb5e461a85ef6bbbc5e8b8fd1c031c"
-      }
-    },
-    "pollinations": {
-      "type": "local",
-      "enabled": true,
-      "command": [
-        "npx",
-        "-y",
-        "@pollinations_ai/mcp"
-      ],
-      "environment": {
-        "POLLINATIONS_API_KEY": "sk_4ZYCXfDG9N51mVO3DyxLchfjNlaWCHST"
-      }
-    },
-    "prompt-to-asset": {
-      "type": "local",
-      "enabled": true,
-      "command": [
-        "npx",
-        "-y",
-        "prompt-to-asset"
-      ]
     }
   }
 }
+

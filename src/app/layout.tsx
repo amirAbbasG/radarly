@@ -1,52 +1,90 @@
-import type { Metadata } from "next";
-import { Space_Grotesk, DM_Sans } from "next/font/google";
-import { ThemeProvider } from "next-themes";
-import "./globals.css";
-import { cn } from "@/lib/utils";
+import { Analytics } from '@vercel/analytics/next'
+import type { Metadata, Viewport } from 'next'
+import { Inter, Space_Grotesk, Geist_Mono } from 'next/font/google'
+import { ThemeProvider } from '@/providers/theme-provider'
+import './globals.css'
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+})
 
 const spaceGrotesk = Space_Grotesk({
-  variable: "--font-heading",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
+  subsets: ['latin'],
+  variable: '--font-heading',
+  display: 'swap',
+})
 
-const dmSans = DM_Sans({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-});
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
-  title: "Radarly — AI Tool Radar",
-  description: "Discover trending AI tools and apps. Curated daily from Product Hunt, GitHub, HN, and Reddit.",
-};
+  title: "Radarly — Discover What's Rising in AI",
+  description:
+    'An AI agent scans Product Hunt, GitHub, Hacker News and Reddit every day, scores real momentum, and surfaces the AI tools that are actually taking off. Scan what matters in under 10 seconds.',
+  generator: 'v0.app',
+  keywords: [
+    'AI tools',
+    'trending AI',
+    'Product Hunt',
+    'AI directory',
+    'developer tools',
+    'indie hackers',
+  ],
+  openGraph: {
+    title: "Radarly — Discover What's Rising in AI",
+    description:
+      'The signal, not the noise. Trending AI tools ranked by real momentum, refreshed daily.',
+    type: 'website',
+  },
+  icons: {
+    icon: [
+      {
+        url: '/icon-light-32x32.png',
+        media: '(prefers-color-scheme: light)',
+      },
+      {
+        url: '/icon-dark-32x32.png',
+        media: '(prefers-color-scheme: dark)',
+      },
+      {
+        url: '/icon.svg',
+        type: 'image/svg+xml',
+      },
+    ],
+    apple: '/apple-icon.png',
+  },
+}
+
+export const viewport: Viewport = {
+  colorScheme: 'dark light',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f7f9fb' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0d12' },
+  ],
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html
       lang="en"
+      className={`${inter.variable} ${spaceGrotesk.variable} ${geistMono.variable} bg-background`}
       suppressHydrationWarning
-      className={cn(
-        "h-full antialiased",
-        spaceGrotesk.variable,
-        dmSans.variable,
-        "font-sans"
-      )}
     >
-      <body className="min-h-full flex flex-col">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
+      <body className="antialiased">
+        <ThemeProvider>
           {children}
         </ThemeProvider>
+        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
-  );
+  )
 }
