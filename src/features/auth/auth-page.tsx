@@ -1,10 +1,10 @@
-import Link from "next/link"
-import { ArrowLeft, ShieldCheck } from "lucide-react"
-import { AuthForm } from "@/features/auth/auth-form"
-import { AuthShowcase } from "@/features/auth/auth-showcase"
-import { Logo } from "@/components/common/logo"
+import Link from "next/link";
+import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { AuthForm } from "@/features/auth/auth-form";
+import { AuthShowcase } from "@/features/auth/auth-showcase";
+import { Logo } from "@/components/common/logo";
 
-type Mode = "sign-in" | "sign-up"
+type Mode = "sign-in" | "sign-up";
 
 export function AuthPage({ mode }: { mode: Mode }) {
   return (
@@ -37,5 +37,5 @@ export function AuthPage({ mode }: { mode: Mode }) {
         </section>
       </div>
     </main>
-  )
+  );
 }

@@ -1,21 +1,24 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Check, Mail } from 'lucide-react'
-import { Reveal } from '@/components/common/reveal'
+import { useState } from "react";
+import { Check, Mail } from "lucide-react";
+import { Reveal } from "@/components/common/reveal";
 
 export function Newsletter() {
-  const [email, setEmail] = useState('')
-  const [done, setDone] = useState(false)
+  const [email, setEmail] = useState("");
+  const [done, setDone] = useState(false);
 
   function submit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!email) return
-    setDone(true)
+    e.preventDefault();
+    if (!email) return;
+    setDone(true);
   }
 
   return (
-    <section id="newsletter" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-10">
+    <section
+      id="newsletter"
+      className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-10"
+    >
       <Reveal>
         <div className="relative overflow-hidden rounded-3xl border border-border bg-card px-6 py-14 text-center sm:px-10">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-secondary/10 to-transparent" />
@@ -28,8 +31,8 @@ export function Newsletter() {
               Get what&apos;s trending, once a week
             </h2>
             <p className="mx-auto mt-3 max-w-md text-pretty text-muted-foreground">
-              The best AI tools, ranked by real momentum. Delivered every Sunday. No
-              spam, unsubscribe anytime.
+              The best AI tools, ranked by real momentum. Delivered every
+              Sunday. No spam, unsubscribe anytime.
             </p>
 
             {done ? (
@@ -46,7 +49,7 @@ export function Newsletter() {
                   type="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   className="h-11 flex-1 rounded-xl border border-border bg-background px-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-secondary"
                 />
@@ -62,5 +65,5 @@ export function Newsletter() {
         </div>
       </Reveal>
     </section>
-  )
+  );
 }

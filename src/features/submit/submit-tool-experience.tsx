@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { useActionState, useMemo, useState } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
+import { useActionState, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -12,30 +12,45 @@ import {
   ShieldCheck,
   Sparkles,
   TrendingUp,
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { submitTool, type SubmissionState } from '@/app/actions/tool-submissions'
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  submitTool,
+  type SubmissionState,
+} from "@/app/actions/tool-submissions";
 
 const CATEGORIES = [
-  'AI assistants',
-  'Developer tools',
-  'Design & creative',
-  'Marketing & sales',
-  'Productivity',
-  'Research & data',
-  'Other',
-]
+  "AI assistants",
+  "Developer tools",
+  "Design & creative",
+  "Marketing & sales",
+  "Productivity",
+  "Research & data",
+  "Other",
+];
 
 const REVIEW_STEPS = [
-  { icon: Radar, title: 'Signal scan', body: 'Our agent pulls activity from Product Hunt, GitHub, HN and Reddit.' },
-  { icon: TrendingUp, title: 'Momentum score', body: 'We measure real traction, not follower counts or launch-day spikes.' },
-  { icon: ShieldCheck, title: 'Human review', body: 'An editor verifies the tool before it reaches the public radar.' },
-]
+  {
+    icon: Radar,
+    title: "Signal scan",
+    body: "Our agent pulls activity from Product Hunt, GitHub, HN and Reddit.",
+  },
+  {
+    icon: TrendingUp,
+    title: "Momentum score",
+    body: "We measure real traction, not follower counts or launch-day spikes.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Human review",
+    body: "An editor verifies the tool before it reaches the public radar.",
+  },
+];
 
-const initialState: SubmissionState = { success: false }
+const initialState: SubmissionState = { success: false };
 
 function FieldError({ message }: { message?: string }) {
-  if (!message) return null
+  if (!message) return null;
   return (
     <motion.p
       initial={{ opacity: 0, y: -4 }}
@@ -44,35 +59,39 @@ function FieldError({ message }: { message?: string }) {
     >
       {message}
     </motion.p>
-  )
+  );
 }
 
 const inputClass =
-  'h-11 w-full rounded-xl border border-input bg-background/60 px-3.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/30 aria-[invalid=true]:border-destructive'
-const labelClass = 'mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground'
+  "h-11 w-full rounded-xl border border-input bg-background/60 px-3.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/30 aria-[invalid=true]:border-destructive";
+const labelClass =
+  "mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground";
 
 export function SubmitToolExperience() {
-  const [state, formAction, pending] = useActionState(submitTool, initialState)
-  const [step, setStep] = useState(0)
-  const [toolName, setToolName] = useState('')
-  const [url, setUrl] = useState('')
-  const [category, setCategory] = useState('')
-  const [description, setDescription] = useState('')
+  const [state, formAction, pending] = useActionState(submitTool, initialState);
+  const [step, setStep] = useState(0);
+  const [toolName, setToolName] = useState("");
+  const [url, setUrl] = useState("");
+  const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
 
-  const errors = state.errors ?? {}
-  const descCount = description.length
+  const errors = state.errors ?? {};
+  const descCount = description.length;
 
   const hostPreview = useMemo(() => {
-    if (!url.trim()) return null
+    if (!url.trim()) return null;
     try {
-      const parsed = new URL(/^https?:\/\//i.test(url) ? url : `https://${url}`)
-      return parsed.hostname.replace(/^www\./, '')
+      const parsed = new URL(
+        /^https?:\/\//i.test(url) ? url : `https://${url}`,
+      );
+      return parsed.hostname.replace(/^www\./, "");
     } catch {
-      return null
+      return null;
     }
-  }, [url])
+  }, [url]);
 
-  const step1Ready = toolName.trim().length >= 2 && !!hostPreview && category !== ''
+  const step1Ready =
+    toolName.trim().length >= 2 && !!hostPreview && category !== "";
 
   if (state.success) {
     return (
@@ -87,17 +106,23 @@ export function SubmitToolExperience() {
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ delay: 0.15, type: 'spring', stiffness: 260, damping: 18 }}
+              transition={{
+                delay: 0.15,
+                type: "spring",
+                stiffness: 260,
+                damping: 18,
+              }}
               className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary/15 text-secondary"
             >
               <CheckCircle2 className="h-8 w-8" />
             </motion.div>
             <h1 className="mt-6 font-heading text-2xl font-bold tracking-tight text-foreground text-balance">
-              {state.message ?? 'Your tool is now on our radar.'}
+              {state.message ?? "Your tool is now on our radar."}
             </h1>
             <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground text-pretty">
-              We&apos;ll scan its momentum over the coming days. If the signal is strong, it&apos;ll surface on
-              the public radar—no follow-up needed.
+              We&apos;ll scan its momentum over the coming days. If the signal
+              is strong, it&apos;ll surface on the public radar—no follow-up
+              needed.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button size="lg" onClick={() => window.location.reload()}>
@@ -114,7 +139,7 @@ export function SubmitToolExperience() {
           </motion.div>
         </div>
       </section>
-    )
+    );
   }
 
   return (
@@ -129,8 +154,9 @@ export function SubmitToolExperience() {
             Put a tool on the radar
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground text-pretty">
-            Found an AI product that&apos;s quietly taking off? Nominate it. We measure real momentum, verify it
-            by hand, and surface only the signal.
+            Found an AI product that&apos;s quietly taking off? Nominate it. We
+            measure real momentum, verify it by hand, and surface only the
+            signal.
           </p>
         </div>
 
@@ -138,7 +164,9 @@ export function SubmitToolExperience() {
           {/* Trust / review panel */}
           <aside className="order-2 lg:order-1">
             <div className="sticky top-24 rounded-3xl border border-border bg-surface/40 p-6">
-              <h2 className="font-heading text-sm font-semibold text-foreground">How review works</h2>
+              <h2 className="font-heading text-sm font-semibold text-foreground">
+                How review works
+              </h2>
               <ol className="mt-5 space-y-5">
                 {REVIEW_STEPS.map((s, i) => (
                   <li key={s.title} className="flex gap-3.5">
@@ -149,7 +177,9 @@ export function SubmitToolExperience() {
                       <p className="text-sm font-semibold text-foreground">
                         {i + 1}. {s.title}
                       </p>
-                      <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{s.body}</p>
+                      <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                        {s.body}
+                      </p>
                     </div>
                   </li>
                 ))}
@@ -166,25 +196,27 @@ export function SubmitToolExperience() {
             <div className="rounded-3xl border border-border bg-card/70 p-6 backdrop-blur-sm sm:p-8">
               {/* Step indicator */}
               <div className="mb-7 flex items-center gap-3">
-                {[0, 1].map((s) => (
+                {[0, 1].map(s => (
                   <div key={s} className="flex flex-1 items-center gap-3">
                     <span
                       className={
-                        'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-colors ' +
+                        "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-colors " +
                         (step >= s
-                          ? 'bg-secondary text-secondary-foreground'
-                          : 'border border-border bg-surface text-muted-foreground')
+                          ? "bg-secondary text-secondary-foreground"
+                          : "border border-border bg-surface text-muted-foreground")
                       }
                     >
                       {s + 1}
                     </span>
                     <span
                       className={
-                        'text-xs font-medium ' +
-                        (step >= s ? 'text-foreground' : 'text-muted-foreground')
+                        "text-xs font-medium " +
+                        (step >= s
+                          ? "text-foreground"
+                          : "text-muted-foreground")
                       }
                     >
-                      {s === 0 ? 'The tool' : 'Context'}
+                      {s === 0 ? "The tool" : "Context"}
                     </span>
                     {s === 0 && <span className="h-px flex-1 bg-border" />}
                   </div>
@@ -217,7 +249,7 @@ export function SubmitToolExperience() {
                           id="toolName"
                           name="toolName"
                           value={toolName}
-                          onChange={(e) => setToolName(e.target.value)}
+                          onChange={e => setToolName(e.target.value)}
                           placeholder="e.g. Radarly"
                           className={inputClass}
                           aria-invalid={!!errors.toolName}
@@ -236,15 +268,17 @@ export function SubmitToolExperience() {
                             id="canonicalUrl"
                             name="canonicalUrl"
                             value={url}
-                            onChange={(e) => setUrl(e.target.value)}
+                            onChange={e => setUrl(e.target.value)}
                             placeholder="yourtool.com"
-                            className={inputClass + ' pl-9'}
+                            className={inputClass + " pl-9"}
                             aria-invalid={!!errors.canonicalUrl}
                             inputMode="url"
                           />
                         </div>
                         {hostPreview && !errors.canonicalUrl && (
-                          <p className="mt-1.5 text-xs text-secondary">Linking to {hostPreview}</p>
+                          <p className="mt-1.5 text-xs text-secondary">
+                            Linking to {hostPreview}
+                          </p>
                         )}
                         <FieldError message={errors.canonicalUrl} />
                       </div>
@@ -253,16 +287,16 @@ export function SubmitToolExperience() {
                         <span className={labelClass}>Category</span>
                         <input type="hidden" name="category" value={category} />
                         <div className="flex flex-wrap gap-2">
-                          {CATEGORIES.map((c) => (
+                          {CATEGORIES.map(c => (
                             <button
                               type="button"
                               key={c}
                               onClick={() => setCategory(c)}
                               className={
-                                'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ' +
+                                "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors " +
                                 (category === c
-                                  ? 'border-secondary bg-secondary/15 text-secondary'
-                                  : 'border-border bg-surface/60 text-muted-foreground hover:border-secondary/60 hover:text-foreground')
+                                  ? "border-secondary bg-secondary/15 text-secondary"
+                                  : "border-border bg-surface/60 text-muted-foreground hover:border-secondary/60 hover:text-foreground")
                               }
                             >
                               {c}
@@ -300,19 +334,24 @@ export function SubmitToolExperience() {
                           id="description"
                           name="description"
                           value={description}
-                          onChange={(e) => setDescription(e.target.value)}
+                          onChange={e => setDescription(e.target.value)}
                           placeholder="What does it do, and why is it gaining momentum right now?"
                           rows={4}
                           maxLength={500}
-                          className={inputClass + ' h-auto resize-none py-2.5 leading-relaxed'}
+                          className={
+                            inputClass +
+                            " h-auto resize-none py-2.5 leading-relaxed"
+                          }
                           aria-invalid={!!errors.description}
                         />
                         <div className="mt-1.5 flex items-center justify-between">
                           <FieldError message={errors.description} />
                           <span
                             className={
-                              'ml-auto text-xs tabular-nums ' +
-                              (descCount >= 40 ? 'text-secondary' : 'text-muted-foreground')
+                              "ml-auto text-xs tabular-nums " +
+                              (descCount >= 40
+                                ? "text-secondary"
+                                : "text-muted-foreground")
                             }
                           >
                             {descCount}/500
@@ -322,7 +361,10 @@ export function SubmitToolExperience() {
 
                       <div>
                         <label htmlFor="evidenceUrl" className={labelClass}>
-                          Traction link <span className="normal-case text-muted-foreground/70">(optional)</span>
+                          Traction link{" "}
+                          <span className="normal-case text-muted-foreground/70">
+                            (optional)
+                          </span>
                         </label>
                         <input
                           id="evidenceUrl"
@@ -367,8 +409,13 @@ export function SubmitToolExperience() {
                           <ArrowLeft className="h-4 w-4" />
                           Back
                         </Button>
-                        <Button type="submit" size="lg" className="flex-1" disabled={pending}>
-                          {pending ? 'Submitting…' : 'Submit to radar'}
+                        <Button
+                          type="submit"
+                          size="lg"
+                          className="flex-1"
+                          disabled={pending}
+                        >
+                          {pending ? "Submitting…" : "Submit to radar"}
                           {!pending && <Send className="h-4 w-4" />}
                         </Button>
                       </div>
@@ -381,5 +428,5 @@ export function SubmitToolExperience() {
         </div>
       </div>
     </section>
-  )
+  );
 }

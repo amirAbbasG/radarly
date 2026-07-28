@@ -3,21 +3,12 @@
   "mcp": {
     "shadcn": {
       "type": "local",
-      "command": [
-        "npx",
-        "shadcn@latest",
-        "mcp"
-      ],
+      "command": ["npx", "shadcn@latest", "mcp"],
       "enabled": true
     },
     "magicuidesign-mcp": {
       "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@magicuidesign/mcp@latest"
-      ]
+      "command": ["npx", "-y", "@magicuidesign/mcp@latest"]
     }
   }
 }
-

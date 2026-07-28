@@ -1,34 +1,34 @@
-import { RadarMark } from '@/components/common/logo'
+import { RadarMark } from "@/components/common/logo";
 
 const COLS = [
   {
-    title: 'Discover',
+    title: "Discover",
     links: [
-      { label: 'Trending', href: '/#trending' },
-      { label: 'Tool of the Week', href: '/#tool-of-week' },
-      { label: 'Categories', href: '/#categories' },
-      { label: 'How it works', href: '/#how-it-works' },
+      { label: "Trending", href: "/#trending" },
+      { label: "Tool of the Week", href: "/#tool-of-week" },
+      { label: "Categories", href: "/#categories" },
+      { label: "How it works", href: "/#how-it-works" },
     ],
   },
   {
-    title: 'Company',
+    title: "Company",
     links: [
-      { label: 'About', href: '/about' },
-      { label: 'Methodology', href: '/about#methodology' },
-      { label: 'Submit a Tool', href: '/submit' },
-      { label: 'Contact', href: 'mailto:hello@radarly.ai' },
+      { label: "About", href: "/about" },
+      { label: "Methodology", href: "/about#methodology" },
+      { label: "Submit a Tool", href: "/submit" },
+      { label: "Contact", href: "mailto:hello@radarly.ai" },
     ],
   },
   {
-    title: 'Resources',
+    title: "Resources",
     links: [
-      { label: 'Newsletter', href: '/#newsletter' },
-      { label: 'FAQ', href: '/about#faq' },
-      { label: 'Transparency', href: '/about#transparency' },
-      { label: 'Home', href: '/' },
+      { label: "Newsletter", href: "/#newsletter" },
+      { label: "FAQ", href: "/about#faq" },
+      { label: "Transparency", href: "/about#transparency" },
+      { label: "Home", href: "/" },
     ],
   },
-]
+];
 
 export function Footer() {
   return (
@@ -43,15 +43,17 @@ export function Footer() {
               </span>
             </a>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
-              The signal, not the noise. Trending AI tools ranked by real momentum,
-              scanned daily so you don&apos;t have to.
+              The signal, not the noise. Trending AI tools ranked by real
+              momentum, scanned daily so you don&apos;t have to.
             </p>
           </div>
-          {COLS.map((col) => (
+          {COLS.map(col => (
             <div key={col.title}>
-              <h3 className="text-sm font-semibold text-foreground">{col.title}</h3>
+              <h3 className="text-sm font-semibold text-foreground">
+                {col.title}
+              </h3>
               <ul className="mt-4 space-y-3">
-                {col.links.map((link) => (
+                {col.links.map(link => (
                   <li key={link.label}>
                     <a
                       href={link.href}
@@ -80,5 +82,5 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { useMemo, useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { AnimatePresence, motion } from "motion/react"
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowRight,
   Check,
@@ -13,15 +13,15 @@ import {
   Lock,
   Mail,
   User,
-} from "lucide-react"
-import { authClient } from "@/lib/auth-client"
-import { getPasswordStrength } from "@/lib/password-strength"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Spinner } from "@/components/ui/spinner"
+} from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import { getPasswordStrength } from "@/lib/password-strength";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 
-type Mode = "sign-in" | "sign-up"
+type Mode = "sign-in" | "sign-up";
 
 const STRENGTH_COLORS = [
   "bg-destructive",
@@ -29,58 +29,62 @@ const STRENGTH_COLORS = [
   "bg-warning",
   "bg-secondary",
   "bg-success",
-]
+];
 
 export function AuthForm({ mode }: { mode: Mode }) {
-  const router = useRouter()
-  const isSignUp = mode === "sign-up"
+  const router = useRouter();
+  const isSignUp = mode === "sign-up";
 
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [remember, setRemember] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const strength = useMemo(() => getPasswordStrength(password), [password])
+  const strength = useMemo(() => getPasswordStrength(password), [password]);
 
   async function handleSocialSignIn(provider: "github" | "google") {
-    setError(null)
-    setLoading(true)
+    setError(null);
+    setLoading(true);
 
     const { error } = await authClient.signIn.social({
       provider,
       callbackURL: "/",
-    })
+    });
 
     if (error) {
-      setLoading(false)
+      setLoading(false);
       setError(
         error.message ??
           `${provider === "github" ? "GitHub" : "Google"} sign-in is not configured yet.`,
-      )
+      );
     }
   }
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
 
     const { error } = isSignUp
       ? await authClient.signUp.email({ email, password, name })
-      : await authClient.signIn.email({ email, password, rememberMe: remember })
+      : await authClient.signIn.email({
+          email,
+          password,
+          rememberMe: remember,
+        });
 
-    setLoading(false)
+    setLoading(false);
 
     if (error) {
-      setError(error.message ?? "Something went wrong. Please try again.")
-      return
+      setError(error.message ?? "Something went wrong. Please try again.");
+      return;
     }
 
-    router.push("/")
-    router.refresh()
+    router.push("/");
+    router.refresh();
   }
 
   return (
@@ -166,7 +170,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 <Input
                   id="name"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={e => setName(e.target.value)}
                   required={isSignUp}
                   autoComplete="name"
                   placeholder="Ada Lovelace"
@@ -182,7 +186,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
             id="email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={e => setEmail(e.target.value)}
             required
             autoComplete="email"
             placeholder="you@company.com"
@@ -209,21 +213,27 @@ export function AuthForm({ mode }: { mode: Mode }) {
             id="password"
             type={showPassword ? "text" : "password"}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={e => setPassword(e.target.value)}
             required
             minLength={8}
             autoComplete={isSignUp ? "new-password" : "current-password"}
-            placeholder={isSignUp ? "At least 8 characters" : "Enter your password"}
+            placeholder={
+              isSignUp ? "At least 8 characters" : "Enter your password"
+            }
             className="h-11 pl-10 pr-10"
           />
           <button
             type="button"
-            onClick={() => setShowPassword((v) => !v)}
+            onClick={() => setShowPassword(v => !v)}
             aria-label={showPassword ? "Hide password" : "Show password"}
             aria-pressed={showPassword}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
           >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
           </button>
         </Field>
 
@@ -240,12 +250,14 @@ export function AuthForm({ mode }: { mode: Mode }) {
               <div className="flex flex-col gap-2 pt-1">
                 <div className="flex items-center gap-2">
                   <div className="flex flex-1 gap-1">
-                    {[0, 1, 2, 3].map((i) => (
+                    {[0, 1, 2, 3].map(i => (
                       <span
                         key={i}
                         className={cn(
                           "h-1 flex-1 rounded-full transition-colors duration-300",
-                          i < strength.score ? STRENGTH_COLORS[strength.score] : "bg-border",
+                          i < strength.score
+                            ? STRENGTH_COLORS[strength.score]
+                            : "bg-border",
                         )}
                       />
                     ))}
@@ -255,12 +267,20 @@ export function AuthForm({ mode }: { mode: Mode }) {
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-x-3 gap-y-1">
-                  <Requirement met={strength.checks.length}>8+ characters</Requirement>
-                  <Requirement met={strength.checks.upper && strength.checks.lower}>
+                  <Requirement met={strength.checks.length}>
+                    8+ characters
+                  </Requirement>
+                  <Requirement
+                    met={strength.checks.upper && strength.checks.lower}
+                  >
                     Upper & lower case
                   </Requirement>
-                  <Requirement met={strength.checks.number}>A number</Requirement>
-                  <Requirement met={strength.checks.symbol}>A symbol</Requirement>
+                  <Requirement met={strength.checks.number}>
+                    A number
+                  </Requirement>
+                  <Requirement met={strength.checks.symbol}>
+                    A symbol
+                  </Requirement>
                 </div>
               </div>
             </motion.div>
@@ -274,10 +294,12 @@ export function AuthForm({ mode }: { mode: Mode }) {
               type="button"
               role="checkbox"
               aria-checked={remember}
-              onClick={() => setRemember((v) => !v)}
+              onClick={() => setRemember(v => !v)}
               className={cn(
                 "inline-flex h-4 w-4 items-center justify-center rounded border transition-colors",
-                remember ? "border-secondary bg-secondary text-secondary-foreground" : "border-input",
+                remember
+                  ? "border-secondary bg-secondary text-secondary-foreground"
+                  : "border-input",
               )}
             >
               {remember && <Check className="h-3 w-3" />}
@@ -327,11 +349,17 @@ export function AuthForm({ mode }: { mode: Mode }) {
         {isSignUp && (
           <p className="text-center text-xs leading-relaxed text-muted-foreground">
             By creating an account you agree to our{" "}
-            <Link href="/terms" className="underline underline-offset-4 hover:text-foreground">
+            <Link
+              href="/terms"
+              className="underline underline-offset-4 hover:text-foreground"
+            >
               Terms
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" className="underline underline-offset-4 hover:text-foreground">
+            <Link
+              href="/privacy"
+              className="underline underline-offset-4 hover:text-foreground"
+            >
               Privacy Policy
             </Link>
             .
@@ -349,7 +377,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         </Link>
       </p>
     </div>
-  )
+  );
 }
 
 function Field({
@@ -359,16 +387,19 @@ function Field({
   action,
   children,
 }: {
-  label: string
-  htmlFor: string
-  icon: React.ComponentType<{ className?: string }>
-  action?: React.ReactNode
-  children: React.ReactNode
+  label: string;
+  htmlFor: string;
+  icon: React.ComponentType<{ className?: string }>;
+  action?: React.ReactNode;
+  children: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center justify-between">
-        <label htmlFor={htmlFor} className="text-sm font-medium text-foreground">
+        <label
+          htmlFor={htmlFor}
+          className="text-sm font-medium text-foreground"
+        >
           {label}
         </label>
         {action}
@@ -378,10 +409,16 @@ function Field({
         {children}
       </div>
     </div>
-  )
+  );
 }
 
-function Requirement({ met, children }: { met: boolean; children: React.ReactNode }) {
+function Requirement({
+  met,
+  children,
+}: {
+  met: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <span
       className={cn(
@@ -399,5 +436,5 @@ function Requirement({ met, children }: { met: boolean; children: React.ReactNod
       </span>
       {children}
     </span>
-  )
+  );
 }

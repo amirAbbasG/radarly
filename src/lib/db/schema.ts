@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core"
+import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
 
 // --- Better Auth required tables -------------------------------------------
 // Column names are camelCase to match Better Auth's defaults. Do not rename.
@@ -11,7 +11,7 @@ export const user = pgTable("user", {
   image: text("image"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
-})
+});
 
 export const session = pgTable("session", {
   id: text("id").primaryKey(),
@@ -24,7 +24,7 @@ export const session = pgTable("session", {
   userId: text("userId")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-})
+});
 
 export const account = pgTable("account", {
   id: text("id").primaryKey(),
@@ -42,7 +42,7 @@ export const account = pgTable("account", {
   password: text("password"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
-})
+});
 
 export const verification = pgTable("verification", {
   id: text("id").primaryKey(),
@@ -51,7 +51,7 @@ export const verification = pgTable("verification", {
   expiresAt: timestamp("expiresAt").notNull(),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").defaultNow(),
-})
+});
 
 export const toolSubmissions = pgTable("tool_submissions", {
   id: text("id").primaryKey(),
@@ -65,4 +65,4 @@ export const toolSubmissions = pgTable("tool_submissions", {
   status: text("status").notNull().default("pending"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
-})
+});

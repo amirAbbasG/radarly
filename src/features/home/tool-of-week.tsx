@@ -1,11 +1,11 @@
-import { ArrowUpRight, Trophy } from 'lucide-react'
-import { Sparkline } from '@/components/common/sparkline'
-import { NumberTicker } from '@/components/common/number-ticker'
-import { Reveal } from '@/components/common/reveal'
-import { TOOL_OF_WEEK } from '@/lib/tools-data'
+import { ArrowUpRight, Trophy } from "lucide-react";
+import { Sparkline } from "@/components/common/sparkline";
+import { NumberTicker } from "@/components/common/number-ticker";
+import { Reveal } from "@/components/common/reveal";
+import { TOOL_OF_WEEK } from "@/lib/tools-data";
 
 export function ToolOfWeek() {
-  const t = TOOL_OF_WEEK
+  const t = TOOL_OF_WEEK;
   return (
     <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-10">
       <Reveal>
@@ -27,7 +27,7 @@ export function ToolOfWeek() {
               </p>
 
               <dl className="mt-6 flex flex-wrap gap-6">
-                {t.stats.map((s) => (
+                {t.stats.map(s => (
                   <div key={s.label}>
                     <dd className="font-heading text-xl font-bold text-foreground">
                       {s.value}
@@ -75,5 +75,5 @@ export function ToolOfWeek() {
         </div>
       </Reveal>
     </section>
-  )
+  );
 }

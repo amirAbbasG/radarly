@@ -1,29 +1,33 @@
-'use client'
+"use client";
 
-import { Radar, Gauge, Sparkles } from 'lucide-react'
-import { Reveal, RevealStagger, itemVariants } from '@/components/common/reveal'
-import { motion } from 'motion/react'
+import { Radar, Gauge, Sparkles } from "lucide-react";
+import {
+  Reveal,
+  RevealStagger,
+  itemVariants,
+} from "@/components/common/reveal";
+import { motion } from "motion/react";
 
 const STEPS = [
   {
-    num: '01',
-    title: 'Scan',
+    num: "01",
+    title: "Scan",
     icon: Radar,
-    desc: 'Our agent monitors Product Hunt, GitHub, Hacker News and Reddit every single day.',
+    desc: "Our agent monitors Product Hunt, GitHub, Hacker News and Reddit every single day.",
   },
   {
-    num: '02',
-    title: 'Score',
+    num: "02",
+    title: "Score",
     icon: Gauge,
-    desc: 'Each tool is ranked by real momentum — upvotes, stars, mentions and velocity.',
+    desc: "Each tool is ranked by real momentum — upvotes, stars, mentions and velocity.",
   },
   {
-    num: '03',
-    title: 'Surface',
+    num: "03",
+    title: "Surface",
     icon: Sparkles,
     desc: "Only what's genuinely rising makes the feed. No pay-to-play, no content farm.",
   },
-]
+];
 
 // need client for motion variants on children
 export function HowItWorks() {
@@ -33,12 +37,14 @@ export function HowItWorks() {
         <h2 className="font-heading text-3xl font-bold tracking-tight text-balance sm:text-4xl">
           How Radarly works
         </h2>
-        <p className="mt-3 text-muted-foreground">Three steps from noise to signal.</p>
+        <p className="mt-3 text-muted-foreground">
+          Three steps from noise to signal.
+        </p>
       </Reveal>
 
       <RevealStagger className="grid grid-cols-1 gap-5 md:grid-cols-3">
         {STEPS.map((s, i) => {
-          const Icon = s.icon
+          const Icon = s.icon;
           return (
             <motion.div
               key={s.num}
@@ -56,14 +62,16 @@ export function HowItWorks() {
               <h3 className="font-heading text-xl font-semibold text-foreground">
                 {s.title}
               </h3>
-              <p className="mt-2 leading-relaxed text-muted-foreground">{s.desc}</p>
+              <p className="mt-2 leading-relaxed text-muted-foreground">
+                {s.desc}
+              </p>
               {i < STEPS.length - 1 && (
                 <div className="absolute right-0 top-1/2 hidden h-px w-5 -translate-y-1/2 translate-x-full bg-border md:block" />
               )}
             </motion.div>
-          )
+          );
         })}
       </RevealStagger>
     </section>
-  )
+  );
 }

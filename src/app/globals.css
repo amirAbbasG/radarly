@@ -1,6 +1,6 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
-@import 'shadcn/tailwind.css';
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -50,6 +50,28 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  --gap: 1rem;
+  --duration: 28s;
+  --animate-marquee: marquee var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes marquee-vertical {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
 }
 
 :root {
@@ -111,8 +133,8 @@
   --accent: oklch(0.78 0.17 65);
   --accent-foreground: oklch(0.15 0.02 65);
   --destructive: oklch(0.65 0.22 25);
-  --border: oklch(0.22 0.012 240);
-  --input: oklch(0.22 0.012 240);
+  --border: oklch(0.28 0.015 240);
+  --input: oklch(0.28 0.015 240);
   --ring: oklch(0.65 0.2 245);
   --surface: oklch(0.16 0.012 240);
   --surface-hover: oklch(0.2 0.015 240);
@@ -160,18 +182,38 @@
 }
 
 /* Marquee for trust strip */
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-.animate-marquee {
-  animation: marquee 28s linear infinite;
-}
-.marquee-mask {
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-}
+/*@keyframes marquee {*/
+/*  from { transform: translateX(0); }*/
+/*  to { transform: translateX(-50%); }*/
+/*}*/
+/*@keyframes marquee-reverse {*/
+/*  from { transform: translateX(-50%); }*/
+/*  to { transform: translateX(0); }*/
+/*}*/
+/*.animate-marquee {*/
+/*  animation: marquee var(--duration, 40s) linear infinite;*/
+/*}*/
+/*.animate-marquee-reverse {*/
+/*  animation: marquee-reverse var(--duration, 40s) linear infinite;*/
+/*}*/
+/*.marquee-mask {*/
+/*  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);*/
+/*  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);*/
+/*}*/
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-marquee { animation: none; }
+  .animate-marquee,
+  .animate-marquee-reverse {
+    animation: none;
+  }
+}
+
+/* View Transition API — theme toggler reveal */
+::view-transition-old(root) {
+  animation: none;
+  opacity: 1;
+}
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }

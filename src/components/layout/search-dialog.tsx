@@ -1,101 +1,119 @@
-'use client'
+"use client";
 
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
-import { Search, X, CornerDownLeft, ArrowUp, ArrowDown, TrendingUp, Flame, Minus } from 'lucide-react'
-import { TOOLS, CATEGORIES, type Tool } from '@/lib/tools-data'
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import {
+  Search,
+  X,
+  CornerDownLeft,
+  ArrowUp,
+  ArrowDown,
+  TrendingUp,
+  Flame,
+  Minus,
+} from "lucide-react";
+import { TOOLS, CATEGORIES, type Tool } from "@/lib/tools-data";
 
-const SIGNAL_META: Record<Tool['sig'], { label: string; icon: typeof Flame; className: string }> = {
-  hot: { label: 'Hot', icon: Flame, className: 'text-secondary' },
-  rising: { label: 'Rising', icon: TrendingUp, className: 'text-primary' },
-  steady: { label: 'Steady', icon: Minus, className: 'text-muted-foreground' },
-}
+const SIGNAL_META: Record<
+  Tool["sig"],
+  { label: string; icon: typeof Flame; className: string }
+> = {
+  hot: { label: "Hot", icon: Flame, className: "text-secondary" },
+  rising: { label: "Rising", icon: TrendingUp, className: "text-primary" },
+  steady: { label: "Steady", icon: Minus, className: "text-muted-foreground" },
+};
 
 function catLabel(id: string) {
-  return CATEGORIES.find((c) => c.id === id)?.label ?? id
+  return CATEGORIES.find(c => c.id === id)?.label ?? id;
 }
 
 export function SearchDialog({
   open,
   onOpenChange,
 }: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
-  const [query, setQuery] = useState('')
-  const [active, setActive] = useState(0)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const listRef = useRef<HTMLDivElement>(null)
+  const [query, setQuery] = useState("");
+  const [active, setActive] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const results = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    const ranked = TOOLS.map((t) => {
-      if (!q) return { t, rank: 0 }
-      const name = t.name.toLowerCase()
-      const hook = t.hook.toLowerCase()
-      const cat = catLabel(t.cat).toLowerCase()
-      const src = t.source.toLowerCase()
-      let rank = -1
-      if (name.startsWith(q)) rank = 3
-      else if (name.includes(q)) rank = 2
-      else if (hook.includes(q) || cat.includes(q) || src.includes(q)) rank = 1
-      return { t, rank }
+    const q = query.trim().toLowerCase();
+    const ranked = TOOLS.map(t => {
+      if (!q) return { t, rank: 0 };
+      const name = t.name.toLowerCase();
+      const hook = t.hook.toLowerCase();
+      const cat = catLabel(t.cat).toLowerCase();
+      const src = t.source.toLowerCase();
+      let rank = -1;
+      if (name.startsWith(q)) rank = 3;
+      else if (name.includes(q)) rank = 2;
+      else if (hook.includes(q) || cat.includes(q) || src.includes(q)) rank = 1;
+      return { t, rank };
     })
-      .filter((r) => r.rank >= 0)
-      .sort((a, b) => b.rank - a.rank || b.t.score - a.t.score)
-    return ranked.map((r) => r.t)
-  }, [query])
+      .filter(r => r.rank >= 0)
+      .sort((a, b) => b.rank - a.rank || b.t.score - a.t.score);
+    return ranked.map(r => r.t);
+  }, [query]);
 
   // reset when opening
   useEffect(() => {
     if (open) {
-      setQuery('')
-      setActive(0)
-      const id = requestAnimationFrame(() => inputRef.current?.focus())
-      return () => cancelAnimationFrame(id)
+      setQuery("");
+      setActive(0);
+      const id = requestAnimationFrame(() => inputRef.current?.focus());
+      return () => cancelAnimationFrame(id);
     }
-  }, [open])
+  }, [open]);
 
   // clamp active index to results
   useEffect(() => {
-    setActive((a) => Math.min(a, Math.max(0, results.length - 1)))
-  }, [results.length])
+    setActive(a => Math.min(a, Math.max(0, results.length - 1)));
+  }, [results.length]);
 
   // lock body scroll
   useEffect(() => {
-    if (!open) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = prev
-    }
-  }, [open])
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
 
   // keep active row in view
   useEffect(() => {
-    const el = listRef.current?.querySelector<HTMLElement>(`[data-index="${active}"]`)
-    el?.scrollIntoView({ block: 'nearest' })
-  }, [active])
+    const el = listRef.current?.querySelector<HTMLElement>(
+      `[data-index="${active}"]`,
+    );
+    el?.scrollIntoView({ block: "nearest" });
+  }, [active]);
 
   function onKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      setActive((a) => (results.length ? (a + 1) % results.length : 0))
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      setActive((a) => (results.length ? (a - 1 + results.length) % results.length : 0))
-    } else if (e.key === 'Enter') {
-      e.preventDefault()
-      if (results[active]) select(results[active])
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActive(a => (results.length ? (a + 1) % results.length : 0));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActive(a =>
+        results.length ? (a - 1 + results.length) % results.length : 0,
+      );
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (results[active]) select(results[active]);
     }
   }
 
   function select(tool: Tool) {
-    onOpenChange(false)
-    const el = document.getElementById('trending')
-    el?.scrollIntoView({ behavior: 'smooth' })
+    onOpenChange(false);
+    const el = document.getElementById("trending");
+    el?.scrollIntoView({ behavior: "smooth" });
     // brief highlight ping via a custom event other components could listen to
-    window.dispatchEvent(new CustomEvent('radarly:select-tool', { detail: tool.name }))
+    window.dispatchEvent(
+      new CustomEvent("radarly:select-tool", { detail: tool.name }),
+    );
   }
 
   return (
@@ -122,7 +140,7 @@ export function SearchDialog({
             initial={{ opacity: 0, y: -12, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
-            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+            transition={{ type: "spring", stiffness: 380, damping: 30 }}
             onKeyDown={onKeyDown}
             className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl shadow-black/30"
           >
@@ -131,9 +149,9 @@ export function SearchDialog({
               <input
                 ref={inputRef}
                 value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value)
-                  setActive(0)
+                onChange={e => {
+                  setQuery(e.target.value);
+                  setActive(0);
                 }}
                 placeholder="Search tools, categories, sources..."
                 className="h-14 w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
@@ -153,7 +171,7 @@ export function SearchDialog({
               {results.length === 0 ? (
                 <div className="px-4 py-12 text-center">
                   <p className="text-sm text-muted-foreground">
-                    No tools match{' '}
+                    No tools match{" "}
                     <span className="font-medium text-foreground">{`"${query}"`}</span>
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
@@ -163,9 +181,9 @@ export function SearchDialog({
               ) : (
                 <ul className="flex flex-col gap-1">
                   {results.map((t, i) => {
-                    const meta = SIGNAL_META[t.sig]
-                    const Icon = meta.icon
-                    const isActive = i === active
+                    const meta = SIGNAL_META[t.sig];
+                    const Icon = meta.icon;
+                    const isActive = i === active;
                     return (
                       <li key={t.name}>
                         <button
@@ -174,8 +192,8 @@ export function SearchDialog({
                           onMouseEnter={() => setActive(i)}
                           onClick={() => select(t)}
                           className={
-                            'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ' +
-                            (isActive ? 'bg-muted' : 'hover:bg-muted/60')
+                            "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors " +
+                            (isActive ? "bg-muted" : "hover:bg-muted/60")
                           }
                         >
                           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-background font-mono text-xs font-semibold text-foreground">
@@ -187,8 +205,10 @@ export function SearchDialog({
                                 {t.name}
                               </span>
                               <span className="inline-flex items-center gap-1 text-[11px] font-medium">
-                                <Icon className={'h-3 w-3 ' + meta.className} />
-                                <span className={meta.className}>{meta.label}</span>
+                                <Icon className={"h-3 w-3 " + meta.className} />
+                                <span className={meta.className}>
+                                  {meta.label}
+                                </span>
                               </span>
                             </span>
                             <span className="mt-0.5 block truncate text-xs text-muted-foreground">
@@ -205,7 +225,7 @@ export function SearchDialog({
                           </span>
                         </button>
                       </li>
-                    )
+                    );
                   })}
                 </ul>
               )}
@@ -230,12 +250,12 @@ export function SearchDialog({
                 </span>
               </span>
               <span className="tabular-nums">
-                {results.length} {results.length === 1 ? 'result' : 'results'}
+                {results.length} {results.length === 1 ? "result" : "results"}
               </span>
             </div>
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
-  )
+  );
 }

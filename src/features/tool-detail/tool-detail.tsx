@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import { useMemo, useRef, useState } from 'react'
-import Link from 'next/link'
-import { motion, useScroll, useSpring } from 'motion/react'
+import { useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { motion, useScroll, useSpring } from "motion/react";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -16,75 +16,79 @@ import {
   Sparkles,
   ThumbsUp,
   TrendingUp,
-} from 'lucide-react'
-import { Sparkline } from '@/components/common/sparkline'
-import { MomentumChart } from '@/features/tool-detail/momentum-chart'
+} from "lucide-react";
+import { Sparkline } from "@/components/common/sparkline";
+import { MomentumChart } from "@/features/tool-detail/momentum-chart";
 import {
   CATEGORY_LABELS,
   toolSlug,
   type Signal,
   type Tool,
   type ToolDetail as ToolDetailData,
-} from '@/lib/tools-data'
+} from "@/lib/tools-data";
 
 const signalMap: Record<
   Signal,
   { label: string; icon: typeof Flame; className: string }
 > = {
-  hot: { label: 'Hot', icon: Flame, className: 'text-accent bg-accent/10 border-accent/20' },
+  hot: {
+    label: "Hot",
+    icon: Flame,
+    className: "text-accent bg-accent/10 border-accent/20",
+  },
   rising: {
-    label: 'Rising',
+    label: "Rising",
     icon: TrendingUp,
-    className: 'text-secondary bg-secondary/10 border-secondary/20',
+    className: "text-secondary bg-secondary/10 border-secondary/20",
   },
   steady: {
-    label: 'Steady',
+    label: "Steady",
     icon: Minus,
-    className: 'text-muted-foreground bg-muted border-border',
+    className: "text-muted-foreground bg-muted border-border",
   },
-}
+};
 
 function initials(name: string) {
   return name
-    .replace(/[^a-zA-Z0-9 ]/g, '')
-    .split(' ')
-    .map((w) => w[0])
-    .join('')
+    .replace(/[^a-zA-Z0-9 ]/g, "")
+    .split(" ")
+    .map(w => w[0])
+    .join("")
     .slice(0, 2)
-    .toUpperCase()
+    .toUpperCase();
 }
 
-const ease = [0.23, 1, 0.32, 1] as const
+const ease = [0.23, 1, 0.32, 1] as const;
 
 function Section({
   children,
   className,
   delay = 0,
 }: {
-  children: React.ReactNode
-  className?: string
-  delay?: number
+  children: React.ReactNode;
+  className?: string;
+  delay?: number;
 }) {
   return (
     <motion.section
-      initial={{ opacity: 0, y: 28, filter: 'blur(6px)' }}
-      whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-      viewport={{ once: true, margin: '-80px' }}
+      initial={{ opacity: 0, y: 28, filter: "blur(6px)" }}
+      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.6, ease, delay }}
       className={className}
     >
       {children}
     </motion.section>
-  )
+  );
 }
 
 const SECTIONS = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'momentum', label: 'Momentum' },
-  { id: 'score', label: 'Score' },
-  { id: 'community', label: 'Community' },
-  { id: 'related', label: 'Related' },
-]
+  { id: "overview", label: "Overview" },
+  { id: "momentum", label: "Momentum" },
+  { id: "score", label: "Score" },
+  { id: "community", label: "Community" },
+  { id: "related", label: "Related" },
+];
 
 export function ToolDetail({
   tool,
@@ -92,38 +96,42 @@ export function ToolDetail({
   related,
   rank,
 }: {
-  tool: Tool
-  detail: ToolDetailData
-  related: Tool[]
-  rank: number
+  tool: Tool;
+  detail: ToolDetailData;
+  related: Tool[];
+  rank: number;
 }) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({ target: containerRef })
-  const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 })
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: containerRef });
+  const progress = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 30,
+    mass: 0.4,
+  });
 
-  const [saved, setSaved] = useState(false)
-  const [copied, setCopied] = useState(false)
-  const [vote, setVote] = useState<'up' | null>(null)
+  const [saved, setSaved] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [vote, setVote] = useState<"up" | null>(null);
 
-  const sig = signalMap[tool.sig]
-  const SigIcon = sig.icon
-  const category = CATEGORY_LABELS[tool.cat] ?? tool.cat
+  const sig = signalMap[tool.sig];
+  const SigIcon = sig.icon;
+  const category = CATEGORY_LABELS[tool.cat] ?? tool.cat;
 
   const baseVotes = useMemo(
     () => detail.reviews.reduce((sum, r) => sum + r.up, 120),
     [detail.reviews],
-  )
+  );
 
   async function handleShare() {
-    const url = typeof window !== 'undefined' ? window.location.href : ''
+    const url = typeof window !== "undefined" ? window.location.href : "";
     try {
       if (navigator.share) {
-        await navigator.share({ title: `${tool.name} · Radarly`, url })
-        return
+        await navigator.share({ title: `${tool.name} · Radarly`, url });
+        return;
       }
-      await navigator.clipboard.writeText(url)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1800)
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
     } catch {
       /* user dismissed */
     }
@@ -155,11 +163,17 @@ export function ToolDetail({
           aria-label="Breadcrumb"
           className="flex items-center gap-1.5 text-sm text-muted-foreground"
         >
-          <Link href="/public" className="transition-colors hover:text-foreground">
+          <Link
+            href="/public"
+            className="transition-colors hover:text-foreground"
+          >
             Home
           </Link>
           <ChevronRight className="size-3.5 opacity-60" />
-          <Link href="/public#trending" className="transition-colors hover:text-foreground">
+          <Link
+            href="/public#trending"
+            className="transition-colors hover:text-foreground"
+          >
             {category}
           </Link>
           <ChevronRight className="size-3.5 opacity-60" />
@@ -178,8 +192,8 @@ export function ToolDetail({
       {/* hero */}
       <div className="mx-auto mt-6 grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[1fr_320px] lg:gap-10 lg:px-10">
         <motion.div
-          initial={{ opacity: 0, y: 24, filter: 'blur(6px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          initial={{ opacity: 0, y: 24, filter: "blur(6px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ duration: 0.6, ease }}
         >
           <div className="flex flex-wrap items-start gap-5">
@@ -190,7 +204,7 @@ export function ToolDetail({
               <div className="flex flex-wrap items-center gap-2">
                 <span
                   className={
-                    'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium ' +
+                    "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium " +
                     sig.className
                   }
                 >
@@ -227,25 +241,29 @@ export function ToolDetail({
             </a>
             <button
               type="button"
-              onClick={() => setSaved((s) => !s)}
+              onClick={() => setSaved(s => !s)}
               aria-pressed={saved}
               className={
-                'inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition-colors ' +
+                "inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition-colors " +
                 (saved
-                  ? 'border-secondary bg-secondary/10 text-secondary'
-                  : 'border-border text-foreground hover:border-secondary/50')
+                  ? "border-secondary bg-secondary/10 text-secondary"
+                  : "border-border text-foreground hover:border-secondary/50")
               }
             >
-              <Bookmark className={'size-4 ' + (saved ? 'fill-current' : '')} />
-              {saved ? 'Saved' : 'Save'}
+              <Bookmark className={"size-4 " + (saved ? "fill-current" : "")} />
+              {saved ? "Saved" : "Save"}
             </button>
             <button
               type="button"
               onClick={handleShare}
               className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-secondary/50"
             >
-              {copied ? <Check className="size-4 text-secondary" /> : <Share2 className="size-4" />}
-              {copied ? 'Copied' : 'Share'}
+              {copied ? (
+                <Check className="size-4 text-secondary" />
+              ) : (
+                <Share2 className="size-4" />
+              )}
+              {copied ? "Copied" : "Share"}
             </button>
           </div>
 
@@ -262,14 +280,22 @@ export function ToolDetail({
                 <div className="font-heading text-2xl font-bold tabular-nums text-foreground">
                   {m.value}
                 </div>
-                <div className="mt-1 text-xs text-muted-foreground">{m.label}</div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  {m.label}
+                </div>
                 <div
                   className={
-                    'mt-2 inline-flex items-center gap-1 text-[11px] font-medium ' +
-                    (m.trend === 'up' ? 'text-secondary' : 'text-muted-foreground')
+                    "mt-2 inline-flex items-center gap-1 text-[11px] font-medium " +
+                    (m.trend === "up"
+                      ? "text-secondary"
+                      : "text-muted-foreground")
                   }
                 >
-                  {m.trend === 'up' ? <TrendingUp className="size-3" /> : <Minus className="size-3" />}
+                  {m.trend === "up" ? (
+                    <TrendingUp className="size-3" />
+                  ) : (
+                    <Minus className="size-3" />
+                  )}
                   {m.delta}
                 </div>
               </motion.div>
@@ -298,17 +324,26 @@ export function ToolDetail({
               <span className="pb-2 text-sm text-muted-foreground">/ 100</span>
             </div>
             <div className="mt-3 h-10 text-secondary">
-              <Sparkline points={tool.spark} className="h-10 w-full" width={260} height={40} />
+              <Sparkline
+                points={tool.spark}
+                className="h-10 w-full"
+                width={260}
+                height={40}
+              />
             </div>
 
             <dl className="mt-5 flex flex-col gap-3 border-t border-border pt-5 text-sm">
               <div className="flex items-center justify-between">
                 <dt className="text-muted-foreground">Pricing</dt>
-                <dd className="font-medium text-foreground">{detail.pricing}</dd>
+                <dd className="font-medium text-foreground">
+                  {detail.pricing}
+                </dd>
               </div>
               <div className="flex items-center justify-between gap-4">
                 <dt className="text-muted-foreground">Plan</dt>
-                <dd className="text-right font-medium text-foreground">{detail.priceNote}</dd>
+                <dd className="text-right font-medium text-foreground">
+                  {detail.priceNote}
+                </dd>
               </div>
               <div className="flex items-center justify-between">
                 <dt className="text-muted-foreground">Source</dt>
@@ -327,9 +362,11 @@ export function ToolDetail({
             </dl>
 
             <div className="mt-5 border-t border-border pt-5">
-              <span className="text-xs text-muted-foreground">Available on</span>
+              <span className="text-xs text-muted-foreground">
+                Available on
+              </span>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {detail.platforms.map((p) => (
+                {detail.platforms.map(p => (
                   <span
                     key={p}
                     className="rounded-md border border-border bg-muted px-2 py-1 text-xs font-medium text-foreground"
@@ -346,7 +383,7 @@ export function ToolDetail({
       {/* in-page nav */}
       <div className="sticky top-16 z-40 mt-12 border-y border-border/70 bg-background/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 sm:px-6 lg:px-10">
-          {SECTIONS.map((s) => (
+          {SECTIONS.map(s => (
             <a
               key={s.id}
               href={`#${s.id}`}
@@ -363,13 +400,15 @@ export function ToolDetail({
           {/* overview */}
           <Section>
             <div id="overview" className="scroll-mt-32">
-              <h2 className="font-heading text-xl font-bold text-foreground">Overview</h2>
+              <h2 className="font-heading text-xl font-bold text-foreground">
+                Overview
+              </h2>
               <p className="mt-4 text-base leading-relaxed text-muted-foreground text-pretty">
                 {detail.about}
               </p>
 
               <div className="mt-8 grid gap-4 sm:grid-cols-3">
-                {detail.highlights.map((h) => (
+                {detail.highlights.map(h => (
                   <div
                     key={h.title}
                     className="rounded-xl border border-border bg-card p-5 transition-colors hover:border-secondary/40"
@@ -388,10 +427,15 @@ export function ToolDetail({
               </div>
 
               <div className="mt-8 rounded-xl border border-border bg-surface/40 p-5">
-                <h3 className="text-sm font-semibold text-foreground">Best for</h3>
+                <h3 className="text-sm font-semibold text-foreground">
+                  Best for
+                </h3>
                 <ul className="mt-3 flex flex-col gap-2">
-                  {detail.bestFor.map((b) => (
-                    <li key={b} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  {detail.bestFor.map(b => (
+                    <li
+                      key={b}
+                      className="flex items-center gap-2 text-sm text-muted-foreground"
+                    >
                       <Check className="size-4 shrink-0 text-secondary" />
                       {b}
                     </li>
@@ -405,8 +449,12 @@ export function ToolDetail({
           <Section>
             <div id="momentum" className="scroll-mt-32">
               <div className="flex items-center justify-between gap-4">
-                <h2 className="font-heading text-xl font-bold text-foreground">Momentum</h2>
-                <span className="text-xs text-muted-foreground">Signal across tracked sources</span>
+                <h2 className="font-heading text-xl font-bold text-foreground">
+                  Momentum
+                </h2>
+                <span className="text-xs text-muted-foreground">
+                  Signal across tracked sources
+                </span>
               </div>
               <div className="mt-4">
                 <MomentumChart points={tool.spark} />
@@ -421,25 +469,32 @@ export function ToolDetail({
                 Score breakdown
               </h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                How Radarly weighs the signal behind the {tool.score} momentum score.
+                How Radarly weighs the signal behind the {tool.score} momentum
+                score.
               </p>
               <div className="mt-6 flex flex-col gap-5">
                 {detail.scoreBreakdown.map((s, i) => (
                   <div key={s.label}>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium text-foreground">{s.label}</span>
-                      <span className="tabular-nums text-muted-foreground">{s.value}</span>
+                      <span className="font-medium text-foreground">
+                        {s.label}
+                      </span>
+                      <span className="tabular-nums text-muted-foreground">
+                        {s.value}
+                      </span>
                     </div>
                     <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
                       <motion.div
                         initial={{ width: 0 }}
                         whileInView={{ width: `${s.value}%` }}
-                        viewport={{ once: true, margin: '-60px' }}
+                        viewport={{ once: true, margin: "-60px" }}
                         transition={{ duration: 0.9, ease, delay: i * 0.1 }}
                         className="h-full rounded-full bg-secondary"
                       />
                     </div>
-                    <p className="mt-1.5 text-xs text-muted-foreground">{s.note}</p>
+                    <p className="mt-1.5 text-xs text-muted-foreground">
+                      {s.note}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -450,28 +505,36 @@ export function ToolDetail({
           <Section>
             <div id="community" className="scroll-mt-32">
               <div className="flex flex-wrap items-center justify-between gap-4">
-                <h2 className="font-heading text-xl font-bold text-foreground">Community</h2>
+                <h2 className="font-heading text-xl font-bold text-foreground">
+                  Community
+                </h2>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
-                    onClick={() => setVote((v) => (v === 'up' ? null : 'up'))}
-                    aria-pressed={vote === 'up'}
+                    onClick={() => setVote(v => (v === "up" ? null : "up"))}
+                    aria-pressed={vote === "up"}
                     className={
-                      'inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ' +
-                      (vote === 'up'
-                        ? 'border-secondary bg-secondary/10 text-secondary'
-                        : 'border-border text-muted-foreground hover:text-foreground')
+                      "inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors " +
+                      (vote === "up"
+                        ? "border-secondary bg-secondary/10 text-secondary"
+                        : "border-border text-muted-foreground hover:text-foreground")
                     }
                   >
-                    <ThumbsUp className={'size-4 ' + (vote === 'up' ? 'fill-current' : '')} />
+                    <ThumbsUp
+                      className={
+                        "size-4 " + (vote === "up" ? "fill-current" : "")
+                      }
+                    />
                     Useful
-                    <span className="tabular-nums">{baseVotes + (vote === 'up' ? 1 : 0)}</span>
+                    <span className="tabular-nums">
+                      {baseVotes + (vote === "up" ? 1 : 0)}
+                    </span>
                   </button>
                 </div>
               </div>
 
               <div className="mt-6 flex flex-col gap-4">
-                {detail.reviews.map((r) => (
+                {detail.reviews.map(r => (
                   <figure
                     key={r.author}
                     className="rounded-xl border border-border bg-card p-5"
@@ -481,8 +544,12 @@ export function ToolDetail({
                         {initials(r.author)}
                       </div>
                       <figcaption>
-                        <div className="text-sm font-semibold text-foreground">{r.author}</div>
-                        <div className="text-xs text-muted-foreground">{r.role}</div>
+                        <div className="text-sm font-semibold text-foreground">
+                          {r.author}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {r.role}
+                        </div>
                       </figcaption>
                       <span className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground">
                         <ThumbsUp className="size-3" />
@@ -501,17 +568,21 @@ export function ToolDetail({
           {/* related */}
           <Section>
             <div id="related" className="scroll-mt-32">
-              <h2 className="font-heading text-xl font-bold text-foreground">Related tools</h2>
+              <h2 className="font-heading text-xl font-bold text-foreground">
+                Related tools
+              </h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 More {category.toLowerCase()} tools climbing the radar.
               </p>
               <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {related.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No related tools yet.</p>
+                  <p className="text-sm text-muted-foreground">
+                    No related tools yet.
+                  </p>
                 )}
-                {related.map((r) => {
-                  const rSig = signalMap[r.sig]
-                  const RIcon = rSig.icon
+                {related.map(r => {
+                  const rSig = signalMap[r.sig];
+                  const RIcon = rSig.icon;
                   return (
                     <Link
                       key={r.name}
@@ -535,7 +606,7 @@ export function ToolDetail({
                       <div className="mt-4 flex items-center justify-between">
                         <span
                           className={
-                            'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ' +
+                            "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium " +
                             rSig.className
                           }
                         >
@@ -548,7 +619,7 @@ export function ToolDetail({
                         </span>
                       </div>
                     </Link>
-                  )
+                  );
                 })}
               </div>
             </div>
@@ -559,7 +630,9 @@ export function ToolDetail({
         <aside className="hidden lg:block">
           <div className="sticky top-32 flex flex-col gap-4">
             <div className="rounded-2xl border border-border bg-card p-6">
-              <h3 className="text-sm font-semibold text-foreground">Quick facts</h3>
+              <h3 className="text-sm font-semibold text-foreground">
+                Quick facts
+              </h3>
               <dl className="mt-4 flex flex-col gap-3 text-sm">
                 <div className="flex items-center justify-between">
                   <dt className="text-muted-foreground">Category</dt>
@@ -575,7 +648,9 @@ export function ToolDetail({
                 </div>
                 <div className="flex items-center justify-between">
                   <dt className="text-muted-foreground">Pricing</dt>
-                  <dd className="font-medium text-foreground">{detail.pricing}</dd>
+                  <dd className="font-medium text-foreground">
+                    {detail.pricing}
+                  </dd>
                 </div>
               </dl>
               <a
@@ -590,7 +665,9 @@ export function ToolDetail({
             </div>
 
             <div className="rounded-2xl border border-border bg-surface/40 p-6">
-              <h3 className="text-sm font-semibold text-foreground">Submit a tool</h3>
+              <h3 className="text-sm font-semibold text-foreground">
+                Submit a tool
+              </h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 Spotted something climbing faster? Put it on our radar.
               </p>
@@ -606,5 +683,5 @@ export function ToolDetail({
         </aside>
       </div>
     </div>
-  )
+  );
 }

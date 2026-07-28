@@ -1,36 +1,36 @@
 export function Sparkline({
   points,
   className,
-  strokeClassName = 'text-secondary',
+  strokeClassName = "text-secondary",
   fill = true,
   width = 120,
   height = 40,
 }: {
-  points: number[]
-  className?: string
-  strokeClassName?: string
-  fill?: boolean
-  width?: number
-  height?: number
+  points: number[];
+  className?: string;
+  strokeClassName?: string;
+  fill?: boolean;
+  width?: number;
+  height?: number;
 }) {
-  const max = Math.max(...points)
-  const min = Math.min(...points)
-  const range = Math.max(1, max - min)
-  const stepX = width / (points.length - 1)
-  const pad = 3
+  const max = Math.max(...points);
+  const min = Math.min(...points);
+  const range = Math.max(1, max - min);
+  const stepX = width / (points.length - 1);
+  const pad = 3;
 
   const coords = points.map((p, i) => {
-    const x = i * stepX
-    const y = height - pad - ((p - min) / range) * (height - pad * 2)
-    return [x, y] as const
-  })
+    const x = i * stepX;
+    const y = height - pad - ((p - min) / range) * (height - pad * 2);
+    return [x, y] as const;
+  });
 
   const line = coords
-    .map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`)
-    .join(' ')
+    .map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`)
+    .join(" ");
 
-  const area = `${line} L${width},${height} L0,${height} Z`
-  const gid = `spark-${points.join('-').slice(0, 12)}-${width}`
+  const area = `${line} L${width},${height} L0,${height} Z`;
+  const gid = `spark-${points.join("-").slice(0, 12)}-${width}`;
 
   return (
     <svg
@@ -60,5 +60,5 @@ export function Sparkline({
         strokeLinejoin="round"
       />
     </svg>
-  )
+  );
 }

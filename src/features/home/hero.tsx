@@ -1,25 +1,25 @@
-'use client'
+"use client";
 
-import { motion } from 'motion/react'
-import { ArrowRight, Radar, Sparkles } from 'lucide-react'
-import { RadarCanvas } from '@/features/home/radar-canvas'
-import { NumberTicker } from '@/components/common/number-ticker'
+import { motion } from "motion/react";
+import { ArrowRight, Radar, Sparkles } from "lucide-react";
+import { RadarCanvas } from "@/features/home/radar-canvas";
+import { NumberTicker } from "@/components/common/number-ticker";
 
-const words = "Discover what's rising in AI — before everyone else".split(' ')
+const words = "Discover what's rising in AI — before everyone else".split(" ");
 
 const container = {
   hidden: {},
   show: { transition: { staggerChildren: 0.06, delayChildren: 0.15 } },
-}
+};
 const wordVariant = {
-  hidden: { opacity: 0, y: 22, filter: 'blur(8px)' },
+  hidden: { opacity: 0, y: 22, filter: "blur(8px)" },
   show: {
     opacity: 1,
     y: 0,
-    filter: 'blur(0px)',
+    filter: "blur(0px)",
     transition: { duration: 0.7, ease: [0.23, 1, 0.32, 1] as const },
   },
-}
+};
 
 export function Hero() {
   return (
@@ -29,7 +29,10 @@ export function Hero() {
       aria-label="Radarly hero"
     >
       {/* ambient orbs */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+      >
         <div className="absolute -left-20 top-24 h-80 w-80 rounded-full bg-secondary/10 blur-[100px]" />
         <div className="absolute right-0 top-1/2 h-72 w-72 rounded-full bg-primary/10 blur-[100px]" />
         <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-accent/10 blur-[100px]" />
@@ -58,13 +61,17 @@ export function Hero() {
             className="font-heading text-4xl font-bold leading-[1.08] tracking-tight text-balance sm:text-5xl lg:text-6xl"
           >
             {words.map((w, i) => (
-              <motion.span key={i} variants={wordVariant} className="inline-block">
-                {w === 'rising' || w === 'AI' ? (
+              <motion.span
+                key={i}
+                variants={wordVariant}
+                className="inline-block"
+              >
+                {w === "rising" || w === "AI" ? (
                   <span className="text-gradient">{w}</span>
                 ) : (
                   w
                 )}
-                {i < words.length - 1 && '\u00A0'}
+                {i < words.length - 1 && "\u00A0"}
               </motion.span>
             ))}
           </motion.h1>
@@ -75,9 +82,9 @@ export function Hero() {
             transition={{ delay: 0.6, duration: 0.6 }}
             className="mt-5 max-w-md text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg"
           >
-            An AI agent scans Product Hunt, GitHub, Hacker News and Reddit every day,
-            scores real momentum, and surfaces the tools actually taking off. The
-            signal — not the noise.
+            An AI agent scans Product Hunt, GitHub, Hacker News and Reddit every
+            day, scores real momentum, and surfaces the tools actually taking
+            off. The signal — not the noise.
           </motion.p>
 
           <motion.div
@@ -109,10 +116,10 @@ export function Hero() {
             className="mt-10 grid w-full max-w-md grid-cols-3 gap-4 border-t border-border pt-6"
           >
             {[
-              { n: 1680, s: '+', l: 'Tools tracked' },
-              { n: 4, s: '', l: 'Sources scanned' },
-              { n: 24, s: 'h', l: 'Refresh cycle' },
-            ].map((stat) => (
+              { n: 1680, s: "+", l: "Tools tracked" },
+              { n: 4, s: "", l: "Sources scanned" },
+              { n: 24, s: "h", l: "Refresh cycle" },
+            ].map(stat => (
               <div key={stat.l} className="flex flex-col">
                 <dd className="font-heading text-2xl font-bold text-foreground sm:text-3xl">
                   <NumberTicker value={stat.n} suffix={stat.s} />
@@ -133,8 +140,15 @@ export function Hero() {
           <motion.div
             aria-hidden="true"
             className="pointer-events-none absolute inset-3 rounded-full border border-secondary/10"
-            animate={{ scale: [0.98, 1.015, 0.98], opacity: [0.35, 0.75, 0.35] }}
-            transition={{ duration: 5, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
+            animate={{
+              scale: [0.98, 1.015, 0.98],
+              opacity: [0.35, 0.75, 0.35],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+            }}
           />
           <RadarCanvas className="relative" />
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -146,5 +160,5 @@ export function Hero() {
         </motion.div>
       </div>
     </section>
-  )
+  );
 }
