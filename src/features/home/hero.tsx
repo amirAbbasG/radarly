@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { ArrowRight, Radar, Sparkles } from "lucide-react";
 import { RadarCanvas } from "@/features/home/radar-canvas";
 import { NumberTicker } from "@/components/common/number-ticker";
+import { AuroraText } from "@/components/ui/aurora-text";
 
 const words = "Discover what's rising in AI — before everyone else".split(" ");
 
@@ -67,7 +68,16 @@ export function Hero({ toolCount = 0 }: { toolCount?: number }) {
                 className="inline-block"
               >
                 {w === "rising" || w === "AI" ? (
-                  <span className="text-gradient">{w}</span>
+                  <AuroraText
+                    speed={2}
+                    colors={[
+                      "var(--primary)",
+                      "var(--secondary)",
+
+                    ]}
+                  >
+                    {w}
+                  </AuroraText>
                 ) : (
                   w
                 )}

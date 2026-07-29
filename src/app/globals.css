@@ -215,6 +215,22 @@
   }
 }
 
+@keyframes aurora {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-aurora {
+  animation: aurora 6s ease-in-out infinite;
+}
+
 /* View Transition API — theme toggler reveal */
 ::view-transition-old(root) {
   animation: none;
