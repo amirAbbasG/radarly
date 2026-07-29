@@ -3,16 +3,7 @@ import { notFound } from "next/navigation";
 import { CategoryExperience } from "@/features/category/category-experience";
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
-import {
-  CATEGORY_PROFILES,
-  getCategoryProfile,
-  getCategoryTools,
-  getRelatedCategories,
-} from "@/lib/tools-data";
-
-export function generateStaticParams() {
-  return CATEGORY_PROFILES.map(category => ({ slug: category.id }));
-}
+import { getCategoryProfiles, getCategoryTools } from "@/lib/data";
 
 export async function generateMetadata({
   params,
@@ -20,10 +11,9 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const category = getCategoryProfile(slug);
-
+  const profiles = await getCategoryProfiles();
+  const category = profiles.find(c => c.id === slug);
   if (!category) return {};
-
   return {
     title: `${category.label} tools — Radarly`,
     description: category.description,
@@ -36,17 +26,20 @@ export default async function CategoryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const category = getCategoryProfile(slug);
-
+  const profiles = await getCategoryProfiles();
+  const category = profiles.find(c => c.id === slug);
   if (!category) notFound();
+
+  const tools = await getCategoryTools(category.toolCategory);
+  const relatedProfiles = profiles.filter(c => c.id !== slug).slice(0, 3);
 
   return (
     <main className="min-h-screen bg-background">
       <Navbar />
       <CategoryExperience
         category={category}
-        tools={getCategoryTools(category)}
-        relatedCategories={getRelatedCategories(category)}
+        tools={tools}
+        relatedCategories={relatedProfiles}
       />
       <Footer />
     </main>
