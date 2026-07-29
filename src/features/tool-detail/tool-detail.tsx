@@ -21,12 +21,12 @@ import { Sparkline } from "@/components/common/sparkline";
 import { MomentumChart } from "@/features/tool-detail/momentum-chart";
 import {
   CATEGORY_LABELS,
-  toolSlug,
   type Signal,
   type Tool,
   type ToolDetail as ToolDetailData,
 } from "@/lib/tools-data";
 import { ToolAvatar } from "@/components/common/tool-avatar";
+import { RelatedCard } from "@/features/tool-detail/related-card";
 
 const signalMap: Record<
   Signal,
@@ -581,50 +581,9 @@ export function ToolDetail({
                     No related tools yet.
                   </p>
                 )}
-                {related.map(r => {
-                  const rSig = signalMap[r.sig];
-                  const RIcon = rSig.icon;
-                  return (
-                    <Link
-                      key={r.name}
-                      href={`/tools/${toolSlug(r.name)}`}
-                      className="group flex flex-col rounded-xl border border-border bg-card p-5 transition-colors hover:border-secondary/40"
-                    >
-                      <div className="flex items-center justify-between">
-                        <ToolAvatar
-                          name={r.name}
-                          logo={r.logo}
-                          website={r.website}
-                          size="sm"
-                        />
-                        <span className="font-heading text-lg font-bold tabular-nums text-foreground">
-                          {r.score}
-                        </span>
-                      </div>
-                      <h3 className="mt-3 font-heading text-sm font-semibold text-foreground">
-                        {r.name}
-                      </h3>
-                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                        {r.hook}
-                      </p>
-                      <div className="mt-4 flex items-center justify-between">
-                        <span
-                          className={
-                            "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium " +
-                            rSig.className
-                          }
-                        >
-                          <RIcon className="size-3" />
-                          {rSig.label}
-                        </span>
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors group-hover:text-secondary">
-                          View
-                          <ArrowUpRight className="size-3.5" />
-                        </span>
-                      </div>
-                    </Link>
-                  );
-                })}
+                {related.map(r => (
+                  <RelatedCard key={r.name} tool={r} />
+                ))}
               </div>
             </div>
           </Section>

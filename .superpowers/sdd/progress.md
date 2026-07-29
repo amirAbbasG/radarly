@@ -1,0 +1,8 @@
+﻿Task 1: complete (commits 782b6b1..3d09952, review clean)
+Task 2: complete (commits 3d09952..b318c84, review clean)
+Task 3: complete (commits b318c84..53070ad, review clean)
+Task 4: complete (commits 53070ad..<current>, review clean)
+Tasks 5-8: complete (ingest routes, commits 3f8b3f4/5e410c1/bda9ab1/a55cb66)
+Task 9: complete (commits 1e03233..0c1ac38, review clean)
+Tasks 10-13: complete (commits through 3281da8)
+Task 14: complete (commits 3281da8..0868bfa, tsc: 9 pre-existing, build: needs migration on prod DB)
