@@ -1,21 +1,9 @@
 import { eq, asc } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { tools } from "@/lib/db/schema";
-import { verifyIngestAuth } from "@/lib/ingest-utils";
+import { verifyIngestAuth, sourceLabel } from "@/lib/ingest-utils";
 
 export const maxDuration = 60;
-
-const PROMPT = `You are categorizing an AI tool. Given the name and source context, return ONLY valid JSON (no markdown, no explanation):
-{
-  "hook": "one-line tagline under 120 chars",
-  "description": "2-3 sentence description of what it does and why it matters",
-  "category": "coding" | "design" | "productivity" | "data" | "audio-video",
-  "tags": ["tag1", "tag2", "tag3"],
-  "website": "https://..."
-}
-Tool name: {name}
-Source: {source}
-Context URL: {url}`;
 
 function computeSignal(history: { date: string; score: number }[]): string {
   if (history.length < 2) return "steady";
@@ -32,79 +20,136 @@ function computeSignal(history: { date: string; score: number }[]): string {
   return "steady";
 }
 
+function fallbackHook(name: string, platform: string): string {
+  const label = sourceLabel(platform);
+  return `${name} — trending AI tool on ${label}`;
+}
+
+function fallbackDescription(name: string, platform: string): string {
+  const label = sourceLabel(platform);
+  return `${name} is an AI tool that surfaced on ${label} and has been climbing the radar. We track its momentum across the sources that matter so you can decide whether it deserves a spot in your stack.`;
+}
+
+function guessCategory(sourceUrl: string, platform: string): string {
+  const url = sourceUrl.toLowerCase();
+  if (url.includes("github.com")) return "coding";
+  if (url.includes("dev.to")) return "coding";
+  if (platform === "producthunt") return "productivity";
+  return "coding";
+}
+
 export async function GET(req: Request) {
   const authError = verifyIngestAuth(req);
   if (authError) return authError;
 
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return Response.json(
-      { ok: false, error: "GEMINI_API_KEY not set" },
-      { status: 500 },
-    );
-  }
 
   const rows = await db
     .select()
     .from(tools)
     .where(eq(tools.status, "pending_summary"))
     .orderBy(asc(tools.firstSeenAt))
-    .limit(10);
+    .limit(50);
 
   let processed = 0;
+  let llmUsed = 0;
+  let fallbackUsed = 0;
+
   for (const row of rows) {
-    try {
-      const prompt = PROMPT.replace("{name}", row.name)
-        .replace("{source}", row.sourcePlatform)
-        .replace("{url}", row.sourceUrl);
+    let hook = row.hook;
+    let description = row.description;
+    let category = row.category;
+    let tags = row.tags ?? [];
+    let website = row.website;
 
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              responseMimeType: "application/json",
-              temperature: 0.3,
+    if (!apiKey || (!hook && !description)) {
+      try {
+        if (apiKey) {
+          const label = sourceLabel(row.sourcePlatform);
+          const prompt = `You are categorizing an AI tool. Return ONLY valid JSON (no markdown):
+{
+  "hook": "one-line tagline under 120 chars",
+  "description": "2-3 sentence description of what it does and why it matters",
+  "category": "coding" | "design" | "productivity" | "data" | "audio-video",
+  "tags": ["tag1", "tag2"],
+  "website": "https://..."
+}
+Tool name: ${row.name}
+Source: ${label}
+Context URL: ${row.sourceUrl}`;
+
+          const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                  responseMimeType: "application/json",
+                  temperature: 0.3,
+                },
+              }),
             },
-          }),
-        },
-      );
-      const json = await res.json();
-      const text = json.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-      const result = JSON.parse(text.trim());
+          );
 
-      const history =
-        (row.momentumHistory as { date: string; score: number }[]) ?? [];
-      const newEntry = {
-        date: new Date().toISOString(),
-        score: row.trendingScore ?? 0,
-      };
-      history.push(newEntry);
-      const signal = computeSignal(history);
+          const json = await res.json();
 
-      await db
-        .update(tools)
-        .set({
-          hook: result.hook ?? row.hook,
-          description: result.description ?? row.description,
-          category: result.category ?? "coding",
-          tags: result.tags ?? [],
-          website: result.website ?? row.website,
-          signal,
-          momentumHistory: history,
-          status: "published",
-          lastUpdatedAt: new Date(),
-        })
-        .where(eq(tools.id, row.id));
-
-      processed++;
-    } catch (err) {
-      console.error("Process failed for", row.name, err);
+          if (!json.error) {
+            const text = json.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+            const cleaned = text
+              .replace(/^```(json)?\s*/i, "")
+              .replace(/\s*```$/, "")
+              .trim();
+            const result = JSON.parse(cleaned);
+            hook = result.hook ?? hook;
+            description = result.description ?? description;
+            category = result.category ?? category;
+            tags = result.tags ?? tags;
+            website = result.website ?? website;
+            llmUsed++;
+          } else {
+            throw new Error(json.error?.message ?? "API error");
+          }
+        } else {
+          throw new Error("No API key");
+        }
+      } catch {
+        hook = hook || fallbackHook(row.name, row.sourcePlatform);
+        description =
+          description || fallbackDescription(row.name, row.sourcePlatform);
+        category = category || guessCategory(row.sourceUrl, row.sourcePlatform);
+        website = website || row.sourceUrl;
+        fallbackUsed++;
+      }
     }
+
+    const history =
+      (row.momentumHistory as { date: string; score: number }[]) ?? [];
+    const newEntry = {
+      date: new Date().toISOString(),
+      score: row.trendingScore ?? 0,
+    };
+    history.push(newEntry);
+    const signal = computeSignal(history);
+
+    await db
+      .update(tools)
+      .set({
+        hook,
+        description,
+        category,
+        tags,
+        website,
+        signal,
+        momentumHistory: history,
+        status: "published",
+        lastUpdatedAt: new Date(),
+      })
+      .where(eq(tools.id, row.id));
+
+    processed++;
   }
 
-  return Response.json({ ok: true, processed });
+  return Response.json({ ok: true, processed, llmUsed, fallbackUsed });
 }
