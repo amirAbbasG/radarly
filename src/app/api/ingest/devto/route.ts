@@ -9,6 +9,8 @@ interface DevtoArticle {
   url: string;
   description: string;
   positive_reactions_count: number;
+  user: { profile_image: string };
+  organization?: { profile_image: string };
 }
 
 export async function GET(req: Request) {
@@ -38,11 +40,16 @@ export async function GET(req: Request) {
         sourcePlatform: "devto",
         externalId: a.url,
         sourceUrl: a.url,
+        logo: a.organization?.profile_image ?? a.user?.profile_image ?? null,
         trendingScore: score,
       })
       .onConflictDoUpdate({
         target: [tools.sourcePlatform, tools.externalId],
-        set: { trendingScore: score, lastUpdatedAt: new Date() },
+        set: {
+          trendingScore: score,
+          logo: a.organization?.profile_image ?? a.user?.profile_image ?? null,
+          lastUpdatedAt: new Date(),
+        },
       });
     inserted++;
   }

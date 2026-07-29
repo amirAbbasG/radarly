@@ -3,6 +3,7 @@ export type Signal = "rising" | "steady" | "hot";
 export type Tool = {
   name: string;
   hook: string;
+  logo?: string;
   cat: string;
   score: number;
   sig: Signal;

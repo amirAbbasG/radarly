@@ -15,6 +15,9 @@ const QUERY = `
           url
           website
           votesCount
+          thumbnail {
+            url
+          }
         }
       }
     }
@@ -50,6 +53,7 @@ export async function GET(req: Request) {
     url: string;
     website: string;
     votesCount: number;
+    thumbnail: { url: string } | null;
   }[] = json.data?.posts?.edges?.map((e: { node: unknown }) => e.node) ?? [];
 
   let inserted = 0;
@@ -72,11 +76,16 @@ export async function GET(req: Request) {
         externalId: p.id,
         sourceUrl: p.url,
         website: p.website || p.url,
+        logo: p.thumbnail?.url ?? null,
         trendingScore: score,
       })
       .onConflictDoUpdate({
         target: [tools.sourcePlatform, tools.externalId],
-        set: { trendingScore: score, lastUpdatedAt: new Date() },
+        set: {
+          trendingScore: score,
+          logo: p.thumbnail?.url ?? null,
+          lastUpdatedAt: new Date(),
+        },
       });
     inserted++;
   }

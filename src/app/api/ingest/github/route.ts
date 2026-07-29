@@ -10,6 +10,7 @@ interface GHRepo {
   html_url: string;
   description: string | null;
   stargazers_count: number;
+  owner: { avatar_url: string };
 }
 
 export async function GET(req: Request) {
@@ -50,11 +51,16 @@ export async function GET(req: Request) {
         externalId: String(r.id),
         sourceUrl: r.html_url,
         website: r.html_url,
+        logo: r.owner?.avatar_url ?? null,
         trendingScore: score,
       })
       .onConflictDoUpdate({
         target: [tools.sourcePlatform, tools.externalId],
-        set: { trendingScore: score, lastUpdatedAt: new Date() },
+        set: {
+          trendingScore: score,
+          logo: r.owner?.avatar_url ?? null,
+          lastUpdatedAt: new Date(),
+        },
       });
     inserted++;
   }

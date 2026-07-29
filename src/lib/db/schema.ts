@@ -21,6 +21,7 @@ export const tools = pgTable(
     id: text("id").primaryKey(),
     name: text("name").notNull(),
     slug: text("slug").notNull().unique(),
+    logo: text("logo"),
     hook: text("hook"),
     description: text("description"),
     category: text("category"),

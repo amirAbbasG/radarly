@@ -13,6 +13,7 @@ function rowToTool(row: typeof tools.$inferSelect): Tool {
   return {
     name: row.name,
     hook: row.hook ?? "",
+    logo: row.logo ?? undefined,
     cat: row.category ?? "coding",
     score: row.trendingScore ?? 0,
     sig: (row.signal as Tool["sig"]) ?? "steady",

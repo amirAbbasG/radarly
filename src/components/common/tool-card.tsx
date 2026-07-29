@@ -89,9 +89,20 @@ export function ToolCard({
         />
         {/* rank + score */}
         <div className="mb-4 flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 font-heading text-sm font-bold text-foreground ring-1 ring-inset ring-border">
+          <div className="flex  gap-3">
+            <div className="flex h-11 w-11 items-center shrink-0 justify-center rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 font-heading text-sm font-bold text-foreground ring-1 ring-inset ring-border overflow-hidden relative">
               {initials(tool.name)}
+              {tool.logo && (
+                <img
+                  src={tool.logo}
+                  alt=""
+                  className="absolute inset-0 h-full w-full rounded-xl object-cover"
+                  onError={e => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                  loading="lazy"
+                />
+              )}
             </div>
             <div>
               <h3 className="font-heading text-base font-semibold leading-tight text-foreground">
