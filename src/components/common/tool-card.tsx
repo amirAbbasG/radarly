@@ -28,6 +28,15 @@ const signalMap: Record<
   },
 };
 
+function faviconUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  try {
+    return `https://www.google.com/s2/favicons?domain=${new URL(url).origin}&sz=80`;
+  } catch {
+    return undefined;
+  }
+}
+
 function initials(name: string) {
   return name
     .replace(/[^a-zA-Z0-9 ]/g, "")
@@ -92,9 +101,9 @@ export function ToolCard({
           <div className="flex  gap-3">
             <div className="flex h-11 w-11 items-center shrink-0 justify-center rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 font-heading text-sm font-bold text-foreground ring-1 ring-inset ring-border overflow-hidden relative">
               {initials(tool.name)}
-              {tool.logo && (
+              {(tool.logo || tool.website) && (
                 <img
-                  src={tool.logo}
+                  src={tool.logo ?? faviconUrl(tool.website)}
                   alt=""
                   className="absolute inset-0 h-full w-full rounded-xl object-cover"
                   onError={e => {

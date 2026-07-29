@@ -4,6 +4,7 @@ export type Tool = {
   name: string;
   hook: string;
   logo?: string;
+  website?: string;
   cat: string;
   score: number;
   sig: Signal;
