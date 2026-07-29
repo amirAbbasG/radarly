@@ -26,6 +26,7 @@ import {
   type Tool,
   type ToolDetail as ToolDetailData,
 } from "@/lib/tools-data";
+import { ToolAvatar } from "@/components/common/tool-avatar";
 
 const signalMap: Record<
   Signal,
@@ -163,10 +164,7 @@ export function ToolDetail({
           aria-label="Breadcrumb"
           className="flex items-center gap-1.5 text-sm text-muted-foreground"
         >
-          <Link
-            href="/"
-            className="transition-colors hover:text-foreground"
-          >
+          <Link href="/" className="transition-colors hover:text-foreground">
             Home
           </Link>
           <ChevronRight className="size-3.5 opacity-60" />
@@ -197,9 +195,12 @@ export function ToolDetail({
           transition={{ duration: 0.6, ease }}
         >
           <div className="flex flex-wrap items-start gap-5">
-            <div className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 font-heading text-xl font-bold text-foreground ring-1 ring-inset ring-border">
-              {initials(tool.name)}
-            </div>
+            <ToolAvatar
+              name={tool.name}
+              logo={tool.logo}
+              website={tool.website}
+              size="lg"
+            />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <span
@@ -590,9 +591,12 @@ export function ToolDetail({
                       className="group flex flex-col rounded-xl border border-border bg-card p-5 transition-colors hover:border-secondary/40"
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 text-xs font-bold text-foreground ring-1 ring-inset ring-border">
-                          {initials(r.name)}
-                        </div>
+                        <ToolAvatar
+                          name={r.name}
+                          logo={r.logo}
+                          website={r.website}
+                          size="sm"
+                        />
                         <span className="font-heading text-lg font-bold tabular-nums text-foreground">
                           {r.score}
                         </span>

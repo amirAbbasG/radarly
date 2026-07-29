@@ -6,6 +6,7 @@ import { ArrowUpRight, Flame, Minus, TrendingUp } from "lucide-react";
 import { MagicCard } from "@/components/ui/magic-card";
 import { Sparkline } from "@/components/common/sparkline";
 import { toolSlug, type Signal, type Tool } from "@/lib/tools-data";
+import { ToolAvatar } from "@/components/common/tool-avatar";
 
 const signalMap: Record<
   Signal,
@@ -27,25 +28,6 @@ const signalMap: Record<
     className: "text-muted-foreground bg-muted border-border",
   },
 };
-
-function faviconUrl(url: string | undefined): string | undefined {
-  if (!url) return undefined;
-  try {
-    return `https://www.google.com/s2/favicons?domain=${new URL(url).origin}&sz=80`;
-  } catch {
-    return undefined;
-  }
-}
-
-function initials(name: string) {
-  return name
-    .replace(/[^a-zA-Z0-9 ]/g, "")
-    .split(" ")
-    .map(w => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
 
 const cardVariant = {
   hidden: { opacity: 0, y: 24, filter: "blur(6px)" },
@@ -98,21 +80,13 @@ export function ToolCard({
         />
         {/* rank + score */}
         <div className="mb-4 flex items-start justify-between">
-          <div className="flex  gap-3">
-            <div className="flex h-11 w-11 items-center shrink-0 justify-center rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 font-heading text-sm font-bold text-foreground ring-1 ring-inset ring-border overflow-hidden relative">
-              {initials(tool.name)}
-              {(tool.logo || tool.website) && (
-                <img
-                  src={tool.logo ?? faviconUrl(tool.website)}
-                  alt=""
-                  className="absolute inset-0 h-full w-full rounded-xl object-cover"
-                  onError={e => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                  }}
-                  loading="lazy"
-                />
-              )}
-            </div>
+          <div className="flex gap-3">
+            <ToolAvatar
+              name={tool.name}
+              logo={tool.logo}
+              website={tool.website}
+              size="md"
+            />
             <div>
               <h3 className="font-heading text-base font-semibold leading-tight text-foreground">
                 {tool.name}
