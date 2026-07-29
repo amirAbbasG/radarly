@@ -3,17 +3,8 @@ import { notFound } from "next/navigation";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ToolDetail } from "@/features/tool-detail/tool-detail";
-import {
-  TOOLS,
-  getRelatedTools,
-  getToolBySlug,
-  getToolDetail,
-  toolSlug,
-} from "@/lib/tools-data";
-
-export function generateStaticParams() {
-  return TOOLS.map(tool => ({ slug: toolSlug(tool.name) }));
-}
+import { getToolBySlug, getRelatedTools, getAllTools } from "@/lib/data";
+import { getToolDetail } from "@/lib/tools-data";
 
 export async function generateMetadata({
   params,
@@ -21,10 +12,10 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const tool = getToolBySlug(slug);
-  if (!tool) return { title: "Tool not found · Radarly" };
+  const tool = await getToolBySlug(slug);
+  if (!tool) return { title: "Tool not found - Radarly" };
   return {
-    title: `${tool.name} · Radarly`,
+    title: `${tool.name} - Radarly`,
     description: tool.hook,
   };
 }
@@ -35,12 +26,16 @@ export default async function ToolPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const tool = getToolBySlug(slug);
+  const tool = await getToolBySlug(slug);
   if (!tool) notFound();
 
-  const detail = getToolDetail(tool);
-  const related = getRelatedTools(tool);
-  const rank = TOOLS.findIndex(t => t.name === tool.name) + 1;
+  const [detail, related, allTools] = await Promise.all([
+    Promise.resolve(getToolDetail(tool)),
+    getRelatedTools(tool, 3),
+    getAllTools(),
+  ]);
+
+  const rank = allTools.findIndex(t => t.name === tool.name) + 1;
 
   return (
     <div className="min-h-screen bg-background">
