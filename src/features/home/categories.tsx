@@ -12,6 +12,7 @@ import {
   ImageIcon,
   Video,
 } from "lucide-react";
+import type { CategoryProfile } from "@/lib/tools-data";
 import { MagicCard } from "@/components/ui/magic-card";
 import {
   Reveal,
@@ -19,66 +20,37 @@ import {
   itemVariants,
 } from "@/components/common/reveal";
 
-const CATS = [
-  {
-    name: "Code & Development",
-    slug: "code-development",
-    count: 342,
-    icon: Code2,
-    color: "text-primary bg-primary/10",
-  },
-  {
-    name: "Writing & Content",
-    slug: "writing-content",
-    count: 287,
-    icon: PenLine,
-    color: "text-secondary bg-secondary/10",
-  },
-  {
-    name: "Design & Creative",
-    slug: "design-creative",
-    count: 198,
-    icon: Palette,
-    color: "text-accent bg-accent/10",
-  },
-  {
-    name: "Productivity",
-    slug: "productivity",
-    count: 256,
-    icon: Zap,
-    color: "text-warning bg-warning/10",
-  },
-  {
-    name: "Data & Analytics",
-    slug: "data-analytics",
-    count: 174,
-    icon: BarChart3,
-    color: "text-success bg-success/10",
-  },
-  {
-    name: "Marketing & SEO",
-    slug: "marketing-seo",
-    count: 213,
-    icon: Megaphone,
-    color: "text-primary bg-primary/10",
-  },
-  {
-    name: "Image Generation",
-    slug: "image-generation",
-    count: 167,
-    icon: ImageIcon,
-    color: "text-accent bg-accent/10",
-  },
-  {
-    name: "Video & Audio",
-    slug: "video-audio",
-    count: 143,
-    icon: Video,
-    color: "text-secondary bg-secondary/10",
-  },
-];
+const ICON_MAP: Record<string, typeof Code2> = {
+  "code-development": Code2,
+  "writing-content": PenLine,
+  "design-creative": Palette,
+  productivity: Zap,
+  "data-analytics": BarChart3,
+  "marketing-seo": Megaphone,
+  "image-generation": ImageIcon,
+  "video-audio": Video,
+};
 
-export function Categories() {
+const COLOR_MAP: Record<string, string> = {
+  primary: "text-primary bg-primary/10",
+  secondary: "text-secondary bg-secondary/10",
+  accent: "text-accent bg-accent/10",
+  success: "text-success bg-success/10",
+  warning: "text-warning bg-warning/10",
+};
+
+export function Categories({
+  categoryProfiles,
+}: {
+  categoryProfiles: CategoryProfile[];
+}) {
+  const cats = categoryProfiles.map(c => ({
+    name: c.label,
+    slug: c.id,
+    count: c.count,
+    icon: ICON_MAP[c.id] ?? Zap,
+    color: COLOR_MAP[c.accent] ?? "text-secondary bg-secondary/10",
+  }));
   return (
     <section
       id="categories"
@@ -94,7 +66,7 @@ export function Categories() {
       </Reveal>
 
       <RevealStagger className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        {CATS.map(c => {
+        {cats.map(c => {
           const Icon = c.icon;
           return (
             <motion.div

@@ -1,5 +1,13 @@
-import { SOURCES } from "@/lib/tools-data";
 import { Marquee } from "@/components/ui/marquee";
+
+const SOURCES = [
+  "Product Hunt",
+  "GitHub",
+  "Hacker News",
+  "Dev.to",
+  "Reddit",
+  "Twitter/X",
+];
 
 export function TrustStrip() {
   return (

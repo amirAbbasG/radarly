@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { CATEGORIES, TOOLS } from "@/lib/tools-data";
+import type { Tool, Category } from "@/lib/tools-data";
 import { ToolCard } from "@/components/common/tool-card";
 import { Reveal } from "@/components/common/reveal";
 
@@ -14,13 +14,19 @@ const SORTS: { id: Sort; label: string }[] = [
   { id: "rising", label: "Fastest rising" },
 ];
 
-export function TrendingFeed() {
+export function TrendingFeed({
+  tools,
+  categories,
+}: {
+  tools: Tool[];
+  categories: Category[];
+}) {
   const [cat, setCat] = useState("all");
   const [sort, setSort] = useState<Sort>("trending");
   const [visible, setVisible] = useState(9);
 
   const filtered = useMemo(() => {
-    let list = TOOLS.filter(t => cat === "all" || t.cat === cat);
+    let list = tools.filter(t => cat === "all" || t.cat === cat);
     if (sort === "score" || sort === "trending") {
       list = [...list].sort((a, b) => b.score - a.score);
     } else if (sort === "rising") {
@@ -68,7 +74,7 @@ export function TrendingFeed() {
 
       {/* category chips */}
       <div className="mb-8 flex flex-wrap gap-2">
-        {CATEGORIES.map(c => {
+        {categories.map(c => {
           const active = cat === c.id;
           return (
             <button

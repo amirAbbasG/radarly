@@ -12,7 +12,7 @@ import {
   Flame,
   Minus,
 } from "lucide-react";
-import { TOOLS, CATEGORIES, type Tool } from "@/lib/tools-data";
+import { CATEGORIES, type Tool } from "@/lib/tools-data";
 
 const SIGNAL_META: Record<
   Tool["sig"],
@@ -41,18 +41,20 @@ export function SearchDialog({
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const ranked = TOOLS.map(t => {
-      if (!q) return { t, rank: 0 };
-      const name = t.name.toLowerCase();
-      const hook = t.hook.toLowerCase();
-      const cat = catLabel(t.cat).toLowerCase();
-      const src = t.source.toLowerCase();
-      let rank = -1;
-      if (name.startsWith(q)) rank = 3;
-      else if (name.includes(q)) rank = 2;
-      else if (hook.includes(q) || cat.includes(q) || src.includes(q)) rank = 1;
-      return { t, rank };
-    })
+    const ranked = ([] as Tool[])
+      .map(t => {
+        if (!q) return { t, rank: 0 };
+        const name = t.name.toLowerCase();
+        const hook = t.hook.toLowerCase();
+        const cat = catLabel(t.cat).toLowerCase();
+        const src = t.source.toLowerCase();
+        let rank = -1;
+        if (name.startsWith(q)) rank = 3;
+        else if (name.includes(q)) rank = 2;
+        else if (hook.includes(q) || cat.includes(q) || src.includes(q))
+          rank = 1;
+        return { t, rank };
+      })
       .filter(r => r.rank >= 0)
       .sort((a, b) => b.rank - a.rank || b.t.score - a.t.score);
     return ranked.map(r => r.t);

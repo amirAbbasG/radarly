@@ -8,19 +8,27 @@ import { Categories } from "@/features/home/categories";
 import { Newsletter } from "@/features/home/newsletter";
 import { Footer } from "@/components/layout/footer";
 import { ScrollProgress } from "@/components/layout/scroll-progress";
+import { getAllTools, getToolOfWeek, getCategoryProfiles } from "@/lib/data";
+import { CATEGORIES } from "@/lib/tools-data";
 
-export default function Page() {
+export default async function Page() {
+  const [allTools, toolOfWeek, categoryProfiles] = await Promise.all([
+    getAllTools(),
+    getToolOfWeek(),
+    getCategoryProfiles(),
+  ]);
+
   return (
     <>
       <ScrollProgress />
       <Navbar />
       <main>
-        <Hero />
+        <Hero toolCount={allTools.length} />
         <TrustStrip />
-        <ToolOfWeek />
-        <TrendingFeed />
+        <ToolOfWeek tool={toolOfWeek} />
+        <TrendingFeed tools={allTools} categories={CATEGORIES} />
         <HowItWorks />
-        <Categories />
+        <Categories categoryProfiles={categoryProfiles} />
         <Newsletter />
       </main>
       <Footer />

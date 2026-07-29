@@ -21,7 +21,7 @@ const wordVariant = {
   },
 };
 
-export function Hero() {
+export function Hero({ toolCount = 0 }: { toolCount?: number }) {
   return (
     <section
       id="top"
@@ -116,7 +116,7 @@ export function Hero() {
             className="mt-10 grid w-full max-w-md grid-cols-3 gap-4 border-t border-border pt-6"
           >
             {[
-              { n: 1680, s: "+", l: "Tools tracked" },
+              { n: toolCount, s: "", l: "Tools tracked" },
               { n: 4, s: "", l: "Sources scanned" },
               { n: 24, s: "h", l: "Refresh cycle" },
             ].map(stat => (
