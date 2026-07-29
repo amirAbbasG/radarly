@@ -38,11 +38,113 @@ function guessCategory(sourceUrl: string, platform: string): string {
   return "coding";
 }
 
+function buildPrompt(
+  name: string,
+  sourceUrl: string,
+  platform: string,
+): string {
+  const label = sourceLabel(platform);
+  return `You are categorizing an AI tool. Return ONLY valid JSON (no markdown):
+{
+  "hook": "one-line tagline under 120 chars",
+  "description": "2-3 sentence description of what it does and why it matters",
+  "category": "coding" | "design" | "productivity" | "data" | "audio-video",
+  "tags": ["tag1", "tag2"],
+  "website": "https://..."
+}
+Tool name: ${name}
+Source: ${label}
+Context URL: ${sourceUrl}`;
+}
+
+function parseLLMResponse(text: string): Record<string, unknown> | null {
+  try {
+    const cleaned = text
+      .replace(/^```(json)?\s*/i, "")
+      .replace(/\s*```$/, "")
+      .trim();
+    return JSON.parse(cleaned) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+function cleanResult(
+  result: Record<string, unknown>,
+  fallbacks: {
+    hook?: string | null;
+    description?: string | null;
+    category?: string | null;
+    tags?: string[];
+    website?: string | null;
+  },
+) {
+  return {
+    hook: (result.hook as string) ?? fallbacks.hook,
+    description: (result.description as string) ?? fallbacks.description,
+    category: (result.category as string) ?? fallbacks.category,
+    tags: (result.tags as string[]) ?? fallbacks.tags,
+    website: (result.website as string) ?? fallbacks.website,
+  };
+}
+
+async function callGemini(
+  prompt: string,
+  apiKey: string,
+): Promise<Record<string, unknown> | null> {
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.3,
+          },
+        }),
+      },
+    );
+    const json = await res.json();
+    if (json.error) return null;
+    const text = json.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    return parseLLMResponse(text);
+  } catch {
+    return null;
+  }
+}
+
+async function callMistral(
+  prompt: string,
+  apiKey: string,
+): Promise<Record<string, unknown> | null> {
+  try {
+    const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "mistral-small-latest",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+      }),
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    const text = json.choices?.[0]?.message?.content ?? "";
+    return parseLLMResponse(text);
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(req: Request) {
   const authError = verifyIngestAuth(req);
   if (authError) return authError;
-
-  const apiKey = process.env.GEMINI_API_KEY;
 
   const rows = await db
     .select()
@@ -52,8 +154,9 @@ export async function GET(req: Request) {
     .limit(50);
 
   let processed = 0;
-  let llmUsed = 0;
-  let fallbackUsed = 0;
+  let geminiCount = 0;
+  let mistralCount = 0;
+  let fallbackCount = 0;
 
   for (const row of rows) {
     let hook = row.hook;
@@ -62,65 +165,40 @@ export async function GET(req: Request) {
     let tags = row.tags ?? [];
     let website = row.website;
 
-    if (!apiKey || (!hook && !description)) {
-      try {
-        if (apiKey) {
-          const label = sourceLabel(row.sourcePlatform);
-          const prompt = `You are categorizing an AI tool. Return ONLY valid JSON (no markdown):
-{
-  "hook": "one-line tagline under 120 chars",
-  "description": "2-3 sentence description of what it does and why it matters",
-  "category": "coding" | "design" | "productivity" | "data" | "audio-video",
-  "tags": ["tag1", "tag2"],
-  "website": "https://..."
-}
-Tool name: ${row.name}
-Source: ${label}
-Context URL: ${row.sourceUrl}`;
+    if (!hook || !description) {
+      const prompt = buildPrompt(row.name, row.sourceUrl, row.sourcePlatform);
+      let result: Record<string, unknown> | null = null;
 
-          const res = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: {
-                  responseMimeType: "application/json",
-                  temperature: 0.3,
-                },
-              }),
-            },
-          );
+      if (process.env.GEMINI_API_KEY) {
+        result = await callGemini(prompt, process.env.GEMINI_API_KEY);
+        if (result) geminiCount++;
+      }
 
-          const json = await res.json();
+      if (!result && process.env.MISTRAL_API_KEY) {
+        result = await callMistral(prompt, process.env.MISTRAL_API_KEY);
+        if (result) mistralCount++;
+      }
 
-          if (!json.error) {
-            const text = json.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-            const cleaned = text
-              .replace(/^```(json)?\s*/i, "")
-              .replace(/\s*```$/, "")
-              .trim();
-            const result = JSON.parse(cleaned);
-            hook = result.hook ?? hook;
-            description = result.description ?? description;
-            category = result.category ?? category;
-            tags = result.tags ?? tags;
-            website = result.website ?? website;
-            llmUsed++;
-          } else {
-            throw new Error(json.error?.message ?? "API error");
-          }
-        } else {
-          throw new Error("No API key");
-        }
-      } catch {
+      if (result) {
+        const cleaned = cleanResult(result, {
+          hook,
+          description,
+          category,
+          tags,
+          website,
+        });
+        hook = cleaned.hook;
+        description = cleaned.description;
+        category = cleaned.category;
+        tags = cleaned.tags;
+        website = cleaned.website;
+      } else {
         hook = hook || fallbackHook(row.name, row.sourcePlatform);
         description =
           description || fallbackDescription(row.name, row.sourcePlatform);
         category = category || guessCategory(row.sourceUrl, row.sourcePlatform);
         website = website || row.sourceUrl;
-        fallbackUsed++;
+        fallbackCount++;
       }
     }
 
@@ -136,11 +214,11 @@ Context URL: ${row.sourceUrl}`;
     await db
       .update(tools)
       .set({
-        hook,
-        description,
-        category,
-        tags,
-        website,
+        hook: hook ?? undefined,
+        description: description ?? undefined,
+        category: category ?? undefined,
+        tags: tags ?? undefined,
+        website: website ?? undefined,
         signal,
         momentumHistory: history,
         status: "published",
@@ -151,5 +229,11 @@ Context URL: ${row.sourceUrl}`;
     processed++;
   }
 
-  return Response.json({ ok: true, processed, llmUsed, fallbackUsed });
+  return Response.json({
+    ok: true,
+    processed,
+    geminiCount,
+    mistralCount,
+    fallbackCount,
+  });
 }
