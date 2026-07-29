@@ -37,7 +37,7 @@ export function RadarMark({ className }: { className?: string }) {
 export function Logo({ className }: { className?: string }) {
   return (
     <a
-      href="/public#top"
+      href="/"
       className={"flex items-center gap-2 " + (className ?? "")}
     >
       <RadarMark className="h-6 w-6 text-secondary" />

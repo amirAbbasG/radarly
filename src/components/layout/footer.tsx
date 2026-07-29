@@ -16,7 +16,7 @@ const COLS = [
       { label: "About", href: "/about" },
       { label: "Methodology", href: "/about#methodology" },
       { label: "Submit a Tool", href: "/submit" },
-      { label: "Contact", href: "mailto:hello@radarly.ai" },
+      { label: "Contact", href: "/contact" },
     ],
   },
   {
@@ -36,7 +36,7 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-10">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
           <div className="col-span-2">
-            <a href="/public" className="flex items-center gap-2">
+            <a href="/" className="flex items-center gap-2">
               <RadarMark className="h-6 w-6 text-secondary" />
               <span className="font-heading text-lg font-bold tracking-tight text-foreground">
                 Radarly

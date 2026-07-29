@@ -378,7 +378,7 @@ export function AboutPage() {
               <Button
                 size="lg"
                 variant="secondary"
-                render={<a href="/public#trending" />}
+                render={<a href="/#trending" />}
               >
                 Explore the radar
                 <ArrowRight data-icon="inline-end" />
@@ -386,7 +386,7 @@ export function AboutPage() {
               <Button
                 size="lg"
                 variant="outline"
-                render={<a href="/public#newsletter" />}
+                render={<a href="/#newsletter" />}
               >
                 <MessagesSquare data-icon="inline-start" />
                 Suggest a tool

@@ -98,7 +98,7 @@ export function CategoryExperience({
       <section className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 pb-10 pt-24 sm:px-6 md:pb-16 md:pt-28 lg:px-10">
           <Link
-            href="/public#categories"
+            href="/#categories"
             className="inline-flex w-fit items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
           >
             <ArrowLeft className="size-4" aria-hidden="true" />
@@ -310,7 +310,7 @@ export function CategoryExperience({
               </h2>
             </div>
             <Link
-              href="/public#categories"
+              href="/#categories"
               className="hidden items-center gap-2 text-sm font-semibold text-foreground hover:text-secondary sm:flex"
             >
               View all categories

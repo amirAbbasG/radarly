@@ -130,7 +130,7 @@ export function SubmitToolExperience() {
                 Submit another tool
               </Button>
               <a
-                href="/public#trending"
+                href="/#trending"
                 className="inline-flex h-9 items-center justify-center rounded-lg border border-border bg-background px-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 Browse the radar

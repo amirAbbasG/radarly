@@ -164,14 +164,14 @@ export function ToolDetail({
           className="flex items-center gap-1.5 text-sm text-muted-foreground"
         >
           <Link
-            href="/public"
+            href="/"
             className="transition-colors hover:text-foreground"
           >
             Home
           </Link>
           <ChevronRight className="size-3.5 opacity-60" />
           <Link
-            href="/public#trending"
+            href="/#trending"
             className="transition-colors hover:text-foreground"
           >
             {category}
@@ -181,7 +181,7 @@ export function ToolDetail({
         </motion.nav>
 
         <Link
-          href="/public"
+          href="/"
           className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
@@ -672,7 +672,7 @@ export function ToolDetail({
                 Spotted something climbing faster? Put it on our radar.
               </p>
               <Link
-                href="/public#newsletter"
+                href="/#newsletter"
                 className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-secondary transition-colors hover:brightness-110"
               >
                 Submit a tool
