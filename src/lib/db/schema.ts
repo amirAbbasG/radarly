@@ -1,4 +1,47 @@
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  integer,
+  jsonb,
+  pgEnum,
+  unique,
+} from "drizzle-orm/pg-core";
+
+export const statusEnum = pgEnum("status", [
+  "pending_summary",
+  "published",
+  "archived",
+]);
+
+export const tools = pgTable(
+  "tools",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    slug: text("slug").notNull().unique(),
+    hook: text("hook"),
+    description: text("description"),
+    category: text("category"),
+    tags: jsonb("tags").$type<string[]>(),
+    sourcePlatform: text("source_platform").notNull(),
+    externalId: text("external_id").notNull(),
+    sourceUrl: text("source_url").notNull(),
+    website: text("website"),
+    trendingScore: integer("trending_score").default(0),
+    momentumHistory: jsonb("momentum_history")
+      .$type<{ date: string; score: number }[]>()
+      .default([]),
+    signal: text("signal"),
+    status: statusEnum("status").default("pending_summary"),
+    firstSeenAt: timestamp("first_seen_at").defaultNow(),
+    lastUpdatedAt: timestamp("last_updated_at").defaultNow(),
+  },
+  table => ({
+    sourceUnique: unique().on(table.sourcePlatform, table.externalId),
+  }),
+);
 
 // --- Better Auth required tables -------------------------------------------
 // Column names are camelCase to match Better Auth's defaults. Do not rename.
