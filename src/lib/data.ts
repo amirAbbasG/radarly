@@ -17,7 +17,7 @@ import type {
 } from "@/lib/tools-data";
 import { CATEGORY_PROFILES } from "@/lib/tools-data";
 
-function rowToTool(row: typeof tools.$inferSelect): Tool {
+export function rowToTool(row: typeof tools.$inferSelect): Tool {
   const history =
     (row.momentumHistory as { date: string; score: number }[]) ?? [];
   return {
