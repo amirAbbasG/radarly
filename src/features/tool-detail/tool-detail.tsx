@@ -4,6 +4,7 @@ import { useRef, useState, useCallback } from "react";
 import { useShare } from "@/hooks/use-share";
 import Link from "next/link";
 import { motion, useScroll, useSpring } from "motion/react";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -103,6 +104,7 @@ export function ToolDetail({
       if (version === saveVersionRef.current) setSaved(result.saved);
     } catch {
       if (version === saveVersionRef.current) setSaved(!next);
+      toast.error("Failed to update bookmark");
     }
   }, [saved, tool.slug]);
 
@@ -123,6 +125,7 @@ export function ToolDetail({
         setVoted(!nextVoted);
         setVoteCount(voteCount);
       }
+      toast.error("Failed to record your vote");
     }
   }, [voted, voteCount, tool.slug]);
 

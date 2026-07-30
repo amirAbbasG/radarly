@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { ThumbsUp, ThumbsDown, MessageSquare } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { voteReview } from "@/app/actions/reviews";
 import { initials } from "@/lib/utils";
 import { timeAgo } from "@/lib/tools-data";
@@ -58,12 +59,15 @@ function ReviewCard({
           setDislikes(result.dislikes);
           setUserVote(result.userVote);
         }
-      } catch {
+      } catch (e) {
         if (version === voteVersionRef.current) {
           setLikes(prevLikes);
           setDislikes(prevDislikes);
           setUserVote(prevVote);
         }
+        toast.error(
+          e instanceof Error ? e.message : "Failed to record your vote",
+        );
       }
     },
     [userVote, likes, dislikes, review.id, review.user.id, isAuthenticated],

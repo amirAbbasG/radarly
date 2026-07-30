@@ -2,6 +2,7 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -81,6 +82,7 @@ export default function RootLayout({
     >
       <body className="antialiased">
         <ThemeProvider>{children}</ThemeProvider>
+        <Toaster />
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
     </html>

@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 import { addReview } from "@/app/actions/reviews";
 import type { ReviewData } from "@/lib/tools-data";
 
@@ -65,7 +66,9 @@ export function ReviewDialog({
       onSubmitted(review);
       onOpenChange(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong");
+      const message = e instanceof Error ? e.message : "Something went wrong";
+      setError(message);
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
