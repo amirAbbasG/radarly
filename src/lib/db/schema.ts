@@ -97,6 +97,40 @@ export const verification = pgTable("verification", {
   updatedAt: timestamp("updatedAt").defaultNow(),
 });
 
+export const savedTools = pgTable(
+  "saved_tools",
+  {
+    id: text("id").primaryKey(),
+    userId: text("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    toolSlug: text("tool_slug")
+      .notNull()
+      .references(() => tools.slug, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  table => ({
+    userToolUnique: unique().on(table.userId, table.toolSlug),
+  }),
+);
+
+export const toolVotes = pgTable(
+  "tool_votes",
+  {
+    id: text("id").primaryKey(),
+    userId: text("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    toolSlug: text("tool_slug")
+      .notNull()
+      .references(() => tools.slug, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  table => ({
+    userToolUnique: unique().on(table.userId, table.toolSlug),
+  }),
+);
+
 export const toolSubmissions = pgTable("tool_submissions", {
   id: text("id").primaryKey(),
   userId: text("userId"),
@@ -110,3 +144,33 @@ export const toolSubmissions = pgTable("tool_submissions", {
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
+
+export const toolReviews = pgTable("tool_reviews", {
+  id: text("id").primaryKey(),
+  toolSlug: text("tool_slug")
+    .notNull()
+    .references(() => tools.slug, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const reviewVotes = pgTable(
+  "review_votes",
+  {
+    id: text("id").primaryKey(),
+    reviewId: text("review_id")
+      .notNull()
+      .references(() => toolReviews.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    vote: integer("vote").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  table => ({
+    uniqueVote: unique().on(table.reviewId, table.userId),
+  }),
+);
