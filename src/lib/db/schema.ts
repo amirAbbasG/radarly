@@ -157,6 +157,15 @@ export const toolReviews = pgTable("tool_reviews", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const contactMessages = pgTable("contact_messages", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  subject: text("subject").notNull(),
+  message: text("message").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const reviewVotes = pgTable(
   "review_votes",
   {

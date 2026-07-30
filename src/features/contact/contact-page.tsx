@@ -1,6 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import {
+  startTransition,
+  useActionState,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Clock, Mail, MessagesSquare, Send, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +16,9 @@ import {
   RevealStagger,
   itemVariants,
 } from "@/components/common/reveal";
+import { sendContactMessage } from "@/app/actions/contact";
+import type { ContactState } from "@/app/actions/contact";
+import { toast } from "sonner";
 
 const CONTACT_EMAIL = "hello@radarly.ai";
 
@@ -46,12 +55,24 @@ const labelClass =
 
 export function ContactPage() {
   const reduce = useReducedMotion();
-  const [sent, setSent] = useState({ value: false, href: "" });
+  const [mailtoSent, setMailtoSent] = useState({ value: false, href: "" });
+  const [sentSuccess, setSentSuccess] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState<(typeof SUBJECTS)[number] | "">("");
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [state, formAction, isPending] = useActionState(sendContactMessage, {
+    success: false,
+  } as ContactState);
+
+  useEffect(() => {
+    if (state.success) setSentSuccess(true);
+    else if (state.message) toast.error(state.message);
+  }, [state.success, state.message]);
+
+  const showSuccess = sentSuccess || mailtoSent.value;
+  const displayErrors = { ...errors, ...(state.errors ?? {}) };
 
   function validate() {
     const next: Record<string, string> = {};
@@ -80,11 +101,30 @@ export function ContactPage() {
     return `mailto:${CONTACT_EMAIL}?${params.toString()}`;
   }, [name, email, subject, message]);
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSend() {
+    if (!validate()) return;
+    const fd = new FormData();
+    fd.set("name", name);
+    fd.set("email", email);
+    fd.set("subject", subject);
+    fd.set("message", message);
+    startTransition(() => formAction(fd));
+  }
+
+  function handleMailto() {
     if (!validate()) return;
     window.location.href = mailtoHref;
-    setSent({ value: true, href: mailtoHref });
+    setMailtoSent({ value: true, href: mailtoHref });
+  }
+
+  function handleReset() {
+    setMailtoSent({ value: false, href: "" });
+    setSentSuccess(false);
+    setName("");
+    setEmail("");
+    setSubject("");
+    setMessage("");
+    setErrors({});
   }
 
   return (
@@ -129,7 +169,7 @@ export function ContactPage() {
           {/* Form / success */}
           <motion.div variants={itemVariants} className="order-1 lg:order-2">
             <div className="rounded-3xl border border-border bg-card/70 p-6 backdrop-blur-sm sm:p-8">
-              {sent.value ? (
+              {showSuccess ? (
                 <div className="text-center">
                   <motion.div
                     initial={{ scale: 0 }}
@@ -144,40 +184,62 @@ export function ContactPage() {
                     <Send className="h-6 w-6" />
                   </motion.div>
                   <h2 className="mt-5 font-heading text-2xl font-bold tracking-tight text-balance text-foreground">
-                    Your mail client should have opened.
+                    {sentSuccess
+                      ? "Message sent!"
+                      : "Your mail client should have opened."}
                   </h2>
                   <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground text-pretty">
-                    If nothing happened, your browser may block
-                    <code className="mx-1 rounded bg-muted px-1.5 py-0.5 text-xs">
-                      mailto:
-                    </code>
-                    links. Email us directly at{" "}
-                    <a
-                      href={`mailto:${CONTACT_EMAIL}`}
-                      className="font-medium text-secondary underline-offset-4 hover:underline"
-                    >
-                      {CONTACT_EMAIL}
-                    </a>
-                    .
+                    {sentSuccess
+                      ? "We read every message and will get back to you soon."
+                      : "If nothing happened, your browser may block"}
+                    {sentSuccess ? (
+                      <>
+                        {" "}
+                        You can also reach us directly at{" "}
+                        <a
+                          href={`mailto:${CONTACT_EMAIL}`}
+                          className="font-medium text-secondary underline-offset-4 hover:underline"
+                        >
+                          {CONTACT_EMAIL}
+                        </a>
+                        .
+                      </>
+                    ) : (
+                      <>
+                        <code className="mx-1 rounded bg-muted px-1.5 py-0.5 text-xs">
+                          mailto:
+                        </code>
+                        links. Email us directly at{" "}
+                        <a
+                          href={`mailto:${CONTACT_EMAIL}`}
+                          className="font-medium text-secondary underline-offset-4 hover:underline"
+                        >
+                          {CONTACT_EMAIL}
+                        </a>
+                        .
+                      </>
+                    )}
                   </p>
                   <div className="mt-7 flex justify-center gap-3">
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      onClick={() => {
-                        setSent({ value: false, href: "" });
-                      }}
-                    >
+                    <Button size="lg" variant="outline" onClick={handleReset}>
                       Write another message
                     </Button>
-                    <Button size="lg" render={<a href={sent.href} />}>
+                    <Button
+                      size="lg"
+                      nativeButton={false}
+                      render={
+                        <a
+                          href={mailtoSent.href || `mailto:${CONTACT_EMAIL}`}
+                        />
+                      }
+                    >
                       <Send className="h-4 w-4" />
                       Open mail again
                     </Button>
                   </div>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} noValidate>
+                <form onSubmit={e => e.preventDefault()} noValidate>
                   <div className="space-y-5">
                     <div className="grid gap-5 sm:grid-cols-2">
                       <div>
@@ -190,10 +252,10 @@ export function ContactPage() {
                           onChange={e => setName(e.target.value)}
                           placeholder="Ada Lovelace"
                           className={inputClass}
-                          aria-invalid={!!errors.name}
+                          aria-invalid={!!displayErrors.name}
                           maxLength={80}
                         />
-                        <FieldError message={errors.name} />
+                        <FieldError message={displayErrors.name} />
                       </div>
                       <div>
                         <label htmlFor="email" className={labelClass}>
@@ -206,9 +268,9 @@ export function ContactPage() {
                           onChange={e => setEmail(e.target.value)}
                           placeholder="you@example.com"
                           className={inputClass}
-                          aria-invalid={!!errors.email}
+                          aria-invalid={!!displayErrors.email}
                         />
-                        <FieldError message={errors.email} />
+                        <FieldError message={displayErrors.email} />
                       </div>
                     </div>
 
@@ -231,7 +293,7 @@ export function ContactPage() {
                           </button>
                         ))}
                       </div>
-                      <FieldError message={errors.subject} />
+                      <FieldError message={displayErrors.subject} />
                     </div>
 
                     <div>
@@ -249,23 +311,42 @@ export function ContactPage() {
                           inputClass +
                           " h-auto resize-none py-2.5 leading-relaxed"
                         }
-                        aria-invalid={!!errors.message}
+                        aria-invalid={!!displayErrors.message}
                       />
                       <div className="mt-1.5 flex items-center justify-between">
-                        <FieldError message={errors.message} />
+                        <FieldError message={displayErrors.message} />
                         <span className="ml-auto text-xs tabular-nums text-muted-foreground">
                           {message.length}/2000
                         </span>
                       </div>
                     </div>
 
-                    <Button type="submit" size="lg" className="w-full">
-                      <Send className="h-4 w-4" />
-                      Open my mail client
-                    </Button>
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        type="button"
+                        size="lg"
+                        className="w-full"
+                        onClick={handleSend}
+                        disabled={isPending}
+                      >
+                        <Send className="h-4 w-4" />
+                        {isPending ? "Sending…" : "Send message"}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="lg"
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleMailto}
+                        disabled={isPending}
+                      >
+                        <Mail className="h-4 w-4" />
+                        Open in my mail client
+                      </Button>
+                    </div>
                     <p className="text-center text-xs text-muted-foreground">
-                      Sending opens your email app — no data stored on our
-                      servers.
+                      Send saves your message on our servers. Open mail client
+                      opens your email app instead.
                     </p>
                   </div>
                 </form>
