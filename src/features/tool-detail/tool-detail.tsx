@@ -569,7 +569,7 @@ export function ToolDetail({
                 rel="noopener noreferrer"
                 className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-secondary px-4 py-2.5 text-sm font-semibold text-secondary-foreground transition-transform hover:brightness-110 active:scale-95"
               >
-                Visit {tool.name}
+                Visit
                 <ArrowUpRight className="size-4" />
               </a>
             </div>
