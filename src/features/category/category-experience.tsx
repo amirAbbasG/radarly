@@ -36,6 +36,12 @@ const signalOptions: { value: SignalFilter; label: string }[] = [
   { value: "steady", label: "Steady" },
 ];
 
+const sortOptions = [
+  { value: "momentum", label: "Top momentum" },
+  { value: "source", label: "Source" },
+  { value: "name", label: "A–Z" },
+];
+
 const accentClasses = {
   primary: "bg-primary/10 text-primary",
   secondary: "bg-secondary/10 text-secondary",
@@ -216,11 +222,7 @@ export function CategoryExperience({
             <Select
               value={sort}
               onValueChange={value => setSort(value as SortMode)}
-              items={[
-                { value: "momentum", label: "Top momentum" },
-                { value: "source", label: "Source" },
-                { value: "name", label: "A–Z" },
-              ]}
+              items={sortOptions}
             >
               <SelectTrigger
                 className="h-10 min-w-44 shrink-0 bg-card"

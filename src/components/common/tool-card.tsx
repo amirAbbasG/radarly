@@ -2,32 +2,12 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
-import { ArrowUpRight, Flame, Minus, TrendingUp } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { MagicCard } from "@/components/ui/magic-card";
 import { Sparkline } from "@/components/common/sparkline";
-import { toolSlug, type Signal, type Tool } from "@/lib/tools-data";
+import { toolSlug, type Tool } from "@/lib/tools-data";
 import { ToolAvatar } from "@/components/common/tool-avatar";
-
-const signalMap: Record<
-  Signal,
-  { label: string; icon: typeof Flame; className: string }
-> = {
-  hot: {
-    label: "Hot",
-    icon: Flame,
-    className: "text-accent bg-accent/10 border-accent/20",
-  },
-  rising: {
-    label: "Rising",
-    icon: TrendingUp,
-    className: "text-secondary bg-secondary/10 border-secondary/20",
-  },
-  steady: {
-    label: "Steady",
-    icon: Minus,
-    className: "text-muted-foreground bg-muted border-border",
-  },
-};
+import { SIGNAL_CONFIG } from "@/lib/signal";
 
 const cardVariant = {
   hidden: { opacity: 0, y: 24, filter: "blur(6px)" },
@@ -48,7 +28,7 @@ export function ToolCard({
   rank: number;
   highlight?: boolean;
 }) {
-  const sig = signalMap[tool.sig];
+  const sig = SIGNAL_CONFIG[tool.sig];
   const SigIcon = sig.icon;
 
   return (
