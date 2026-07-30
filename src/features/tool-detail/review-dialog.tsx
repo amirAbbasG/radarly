@@ -18,10 +18,15 @@ export function ReviewDialog({
   toolSlug: string;
   onSubmitted: (review: ReviewData) => void;
 }) {
+  const [mounted, setMounted] = useState(false);
   const [content, setContent] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (open) {
@@ -75,6 +80,7 @@ export function ReviewDialog({
     }
   }
 
+  if (!mounted) return null;
   return createPortal(
     <AnimatePresence>
       {open && (
