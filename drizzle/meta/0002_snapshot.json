@@ -95,12 +95,8 @@
           "name": "account_userId_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -153,12 +149,8 @@
           "name": "review_votes_review_id_tool_reviews_id_fk",
           "tableFrom": "review_votes",
           "tableTo": "tool_reviews",
-          "columnsFrom": [
-            "review_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["review_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -166,12 +158,8 @@
           "name": "review_votes_user_id_user_id_fk",
           "tableFrom": "review_votes",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -181,84 +169,7 @@
         "review_votes_review_id_user_id_unique": {
           "name": "review_votes_review_id_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "review_id",
-            "user_id"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.saved_tools": {
-      "name": "saved_tools",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "userId": {
-          "name": "userId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "tool_slug": {
-          "name": "tool_slug",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "saved_tools_userId_user_id_fk": {
-          "name": "saved_tools_userId_user_id_fk",
-          "tableFrom": "saved_tools",
-          "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "saved_tools_tool_slug_tools_slug_fk": {
-          "name": "saved_tools_tool_slug_tools_slug_fk",
-          "tableFrom": "saved_tools",
-          "tableTo": "tools",
-          "columnsFrom": [
-            "tool_slug"
-          ],
-          "columnsTo": [
-            "slug"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "saved_tools_userId_tool_slug_unique": {
-          "name": "saved_tools_userId_tool_slug_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "userId",
-            "tool_slug"
-          ]
+          "columns": ["review_id", "user_id"]
         }
       },
       "policies": {},
@@ -326,12 +237,8 @@
           "name": "session_userId_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -341,9 +248,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -392,12 +297,8 @@
           "name": "tool_reviews_tool_slug_tools_slug_fk",
           "tableFrom": "tool_reviews",
           "tableTo": "tools",
-          "columnsFrom": [
-            "tool_slug"
-          ],
-          "columnsTo": [
-            "slug"
-          ],
+          "columnsFrom": ["tool_slug"],
+          "columnsTo": ["slug"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -405,12 +306,8 @@
           "name": "tool_reviews_user_id_user_id_fk",
           "tableFrom": "tool_reviews",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -499,80 +396,6 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.tool_votes": {
-      "name": "tool_votes",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "userId": {
-          "name": "userId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "tool_slug": {
-          "name": "tool_slug",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "tool_votes_userId_user_id_fk": {
-          "name": "tool_votes_userId_user_id_fk",
-          "tableFrom": "tool_votes",
-          "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "tool_votes_tool_slug_tools_slug_fk": {
-          "name": "tool_votes_tool_slug_tools_slug_fk",
-          "tableFrom": "tool_votes",
-          "tableTo": "tools",
-          "columnsFrom": [
-            "tool_slug"
-          ],
-          "columnsTo": [
-            "slug"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "tool_votes_userId_tool_slug_unique": {
-          "name": "tool_votes_userId_tool_slug_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "userId",
-            "tool_slug"
-          ]
-        }
-      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -703,17 +526,12 @@
         "tools_slug_unique": {
           "name": "tools_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         },
         "tools_source_platform_external_id_unique": {
           "name": "tools_source_platform_external_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "source_platform",
-            "external_id"
-          ]
+          "columns": ["source_platform", "external_id"]
         }
       },
       "policies": {},
@@ -777,9 +595,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -842,11 +658,7 @@
     "public.status": {
       "name": "status",
       "schema": "public",
-      "values": [
-        "pending_summary",
-        "published",
-        "archived"
-      ]
+      "values": ["pending_summary", "published", "archived"]
     }
   },
   "schemas": {},

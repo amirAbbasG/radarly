@@ -145,7 +145,7 @@ export async function getToolReviews(
     likes: r.likes,
     dislikes: r.dislikes,
     userVote: r.userVote,
-    user: { name: r.userName!, id: r.userId! },
+    user: { name: r.userName ?? "", id: r.userId ?? "" },
   }));
 }
 
