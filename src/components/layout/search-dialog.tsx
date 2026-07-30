@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Search,
@@ -17,6 +18,7 @@ import type { Tool } from "@/lib/tools-data";
 import { CATEGORIES } from "@/lib/tools-data";
 import { searchTools } from "@/app/actions/search";
 import { useDebounce } from "@/hooks/use-debounce";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SIGNAL_META: Record<
   Tool["sig"],
@@ -38,6 +40,7 @@ export function SearchDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const [results, setResults] = useState<Tool[]>([]);
@@ -125,11 +128,7 @@ export function SearchDialog({
 
   function select(tool: Tool) {
     onOpenChange(false);
-    const el = document.getElementById("trending");
-    el?.scrollIntoView({ behavior: "smooth" });
-    window.dispatchEvent(
-      new CustomEvent("radarly:select-tool", { detail: tool.name }),
-    );
+    router.push(`/tools/${tool.slug}`);
   }
 
   return (
@@ -195,8 +194,20 @@ export function SearchDialog({
                   </p>
                 </div>
               ) : loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                <div className="flex flex-col gap-1 p-1">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 rounded-xl px-3 py-2.5"
+                    >
+                      <Skeleton className="h-9 w-9 shrink-0 rounded-lg" />
+                      <span className="min-w-0 flex-1 space-y-1.5">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-3 w-48" />
+                      </span>
+                      <Skeleton className="hidden h-5 w-14 shrink-0 rounded-md sm:block" />
+                    </div>
+                  ))}
                 </div>
               ) : results.length === 0 ? (
                 <div className="px-4 py-12 text-center">
