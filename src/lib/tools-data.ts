@@ -156,7 +156,6 @@ export type ToolDetail = {
   bestFor: string[];
   highlights: { title: string; body: string }[];
   scoreBreakdown: { label: string; value: number; note: string }[];
-  reviews: { author: string; role: string; text: string; up: number }[];
   metrics: {
     label: string;
     value: string;
@@ -175,7 +174,7 @@ export type ReviewData = {
   user: { name: string; id: string };
 };
 
-function timeAgo(iso: string): string {
+export function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 60) return `${mins}m ago`;
@@ -220,12 +219,6 @@ const PLATFORMS = [
   "VS Code",
 ];
 const PRICING: Pricing[] = ["Free", "Freemium", "Paid"];
-const REVIEWERS = [
-  { author: "Alex Rivera", role: "Senior Engineer" },
-  { author: "Priya Nair", role: "Product Designer" },
-  { author: "Jordan Kim", role: "Indie Hacker" },
-  { author: "Sam Okafor", role: "Startup CTO" },
-];
 
 // ponytail: hash stays for fields without real DB columns yet (pricing, platforms, bestFor, highlights, reviews)
 function hash(str: string) {
@@ -325,18 +318,6 @@ export function getToolDetail(tool: Tool): ToolDetail {
         label: "Source confidence",
         value: sourceConf,
         note: stats.trend >= 0 ? "Signal strengthening" : "Signal weakening",
-      },
-    ],
-    reviews: [
-      {
-        ...REVIEWERS[h % REVIEWERS.length],
-        text: `Switched to ${tool.name} recently and it stuck. The learning curve was short and it saved real time in week one.`,
-        up: 40 + (h % 120),
-      },
-      {
-        ...REVIEWERS[(h + 1) % REVIEWERS.length],
-        text: `Solid for ${cat.toLowerCase()} work. Not perfect, but the momentum here is well earned — the team ships improvements fast.`,
-        up: 18 + (h % 70),
       },
     ],
     metrics: [

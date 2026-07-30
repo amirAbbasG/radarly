@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
+import { useShare } from "@/hooks/use-share";
 import Link from "next/link";
 import { motion, useScroll, useSpring } from "motion/react";
 import {
@@ -9,7 +10,6 @@ import {
   Bookmark,
   Check,
   ChevronRight,
-  Flame,
   Globe,
   Minus,
   Share2,
@@ -21,33 +21,13 @@ import { Sparkline } from "@/components/common/sparkline";
 import { MomentumChart } from "@/features/tool-detail/momentum-chart";
 import {
   CATEGORY_LABELS,
-  type Signal,
   type Tool,
   type ToolDetail as ToolDetailData,
 } from "@/lib/tools-data";
 import { ToolAvatar } from "@/components/common/tool-avatar";
 import { RelatedCard } from "@/features/tool-detail/related-card";
-
-const signalMap: Record<
-  Signal,
-  { label: string; icon: typeof Flame; className: string }
-> = {
-  hot: {
-    label: "Hot",
-    icon: Flame,
-    className: "text-accent bg-accent/10 border-accent/20",
-  },
-  rising: {
-    label: "Rising",
-    icon: TrendingUp,
-    className: "text-secondary bg-secondary/10 border-secondary/20",
-  },
-  steady: {
-    label: "Steady",
-    icon: Minus,
-    className: "text-muted-foreground bg-muted border-border",
-  },
-};
+import { SIGNAL_CONFIG } from "@/lib/signal";
+import { toggleSave, castVote } from "@/app/actions/tool-interactions";
 
 function initials(name: string) {
   return name
@@ -96,11 +76,13 @@ export function ToolDetail({
   detail,
   related,
   rank,
+  interactionState,
 }: {
   tool: Tool;
   detail: ToolDetailData;
   related: Tool[];
   rank: number;
+  interactionState: { saved: boolean; voted: boolean; voteCount: number };
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: containerRef });
@@ -110,33 +92,50 @@ export function ToolDetail({
     mass: 0.4,
   });
 
-  const [saved, setSaved] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [vote, setVote] = useState<"up" | null>(null);
+  const [saved, setSaved] = useState(interactionState.saved);
+  const [voted, setVoted] = useState(interactionState.voted);
+  const [voteCount, setVoteCount] = useState(interactionState.voteCount);
 
-  const sig = signalMap[tool.sig];
+  const saveVersionRef = useRef(0);
+  const voteVersionRef = useRef(0);
+
+  const handleSave = useCallback(async () => {
+    const next = !saved;
+    setSaved(next);
+    const version = ++saveVersionRef.current;
+    try {
+      const result = await toggleSave(tool.slug);
+      if (version === saveVersionRef.current) setSaved(result.saved);
+    } catch {
+      if (version === saveVersionRef.current) setSaved(!next);
+    }
+  }, [saved, tool.slug]);
+
+  const handleVote = useCallback(async () => {
+    const nextVoted = !voted;
+    const nextCount = nextVoted ? voteCount + 1 : voteCount - 1;
+    setVoted(nextVoted);
+    setVoteCount(nextCount);
+    const version = ++voteVersionRef.current;
+    try {
+      const result = await castVote(tool.slug);
+      if (version === voteVersionRef.current) {
+        setVoted(result.voted);
+        setVoteCount(result.count);
+      }
+    } catch {
+      if (version === voteVersionRef.current) {
+        setVoted(!nextVoted);
+        setVoteCount(voteCount);
+      }
+    }
+  }, [voted, voteCount, tool.slug]);
+
+  const sig = SIGNAL_CONFIG[tool.sig];
   const SigIcon = sig.icon;
   const category = CATEGORY_LABELS[tool.cat] ?? tool.cat;
 
-  const baseVotes = useMemo(
-    () => detail.reviews.reduce((sum, r) => sum + r.up, 120),
-    [detail.reviews],
-  );
-
-  async function handleShare() {
-    const url = typeof window !== "undefined" ? window.location.href : "";
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: `${tool.name} · Radarly`, url });
-        return;
-      }
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    } catch {
-      /* user dismissed */
-    }
-  }
+  const { copied, share: handleShare } = useShare();
 
   return (
     <div ref={containerRef} className="relative">
@@ -242,7 +241,7 @@ export function ToolDetail({
             </a>
             <button
               type="button"
-              onClick={() => setSaved(s => !s)}
+              onClick={handleSave}
               aria-pressed={saved}
               className={
                 "inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition-colors " +
@@ -256,7 +255,7 @@ export function ToolDetail({
             </button>
             <button
               type="button"
-              onClick={handleShare}
+              onClick={() => handleShare({ title: `${tool.name} · Radarly` })}
               className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-secondary/50"
             >
               {copied ? (
@@ -512,56 +511,22 @@ export function ToolDetail({
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
-                    onClick={() => setVote(v => (v === "up" ? null : "up"))}
-                    aria-pressed={vote === "up"}
+                    onClick={handleVote}
+                    aria-pressed={voted}
                     className={
                       "inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors " +
-                      (vote === "up"
+                      (voted
                         ? "border-secondary bg-secondary/10 text-secondary"
                         : "border-border text-muted-foreground hover:text-foreground")
                     }
                   >
                     <ThumbsUp
-                      className={
-                        "size-4 " + (vote === "up" ? "fill-current" : "")
-                      }
+                      className={"size-4 " + (voted ? "fill-current" : "")}
                     />
                     Useful
-                    <span className="tabular-nums">
-                      {baseVotes + (vote === "up" ? 1 : 0)}
-                    </span>
+                    <span className="tabular-nums">{voteCount}</span>
                   </button>
                 </div>
-              </div>
-
-              <div className="mt-6 flex flex-col gap-4">
-                {detail.reviews.map(r => (
-                  <figure
-                    key={r.author}
-                    className="rounded-xl border border-border bg-card p-5"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 text-xs font-bold text-foreground ring-1 ring-inset ring-border">
-                        {initials(r.author)}
-                      </div>
-                      <figcaption>
-                        <div className="text-sm font-semibold text-foreground">
-                          {r.author}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {r.role}
-                        </div>
-                      </figcaption>
-                      <span className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground">
-                        <ThumbsUp className="size-3" />
-                        {r.up}
-                      </span>
-                    </div>
-                    <blockquote className="mt-3 text-sm leading-relaxed text-muted-foreground text-pretty">
-                      {r.text}
-                    </blockquote>
-                  </figure>
-                ))}
               </div>
             </div>
           </Section>
