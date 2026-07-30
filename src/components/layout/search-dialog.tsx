@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Search,
@@ -11,8 +11,12 @@ import {
   TrendingUp,
   Flame,
   Minus,
+  Loader2,
 } from "lucide-react";
-import { CATEGORIES, type Tool } from "@/lib/tools-data";
+import type { Tool } from "@/lib/tools-data";
+import { CATEGORIES } from "@/lib/tools-data";
+import { searchTools } from "@/app/actions/search";
+import { useDebounce } from "@/hooks/use-debounce";
 
 const SIGNAL_META: Record<
   Tool["sig"],
@@ -36,34 +40,41 @@ export function SearchDialog({
 }) {
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
+  const [results, setResults] = useState<Tool[]>([]);
+  const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const versionRef = useRef(0);
 
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const ranked = ([] as Tool[])
-      .map(t => {
-        if (!q) return { t, rank: 0 };
-        const name = t.name.toLowerCase();
-        const hook = t.hook.toLowerCase();
-        const cat = catLabel(t.cat).toLowerCase();
-        const src = t.source.toLowerCase();
-        let rank = -1;
-        if (name.startsWith(q)) rank = 3;
-        else if (name.includes(q)) rank = 2;
-        else if (hook.includes(q) || cat.includes(q) || src.includes(q))
-          rank = 1;
-        return { t, rank };
-      })
-      .filter(r => r.rank >= 0)
-      .sort((a, b) => b.rank - a.rank || b.t.score - a.t.score);
-    return ranked.map(r => r.t);
-  }, [query]);
+  const debounced = useDebounce(query.trim(), 200);
+
+  useEffect(() => {
+    if (!debounced) {
+      setResults([]);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    const version = ++versionRef.current;
+    setLoading(true);
+
+    searchTools(debounced).then(tools => {
+      if (cancelled || version !== versionRef.current) return;
+      setResults(tools);
+      setLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [debounced]);
 
   // reset when opening
   useEffect(() => {
     if (open) {
       setQuery("");
+      setResults([]);
       setActive(0);
       const id = requestAnimationFrame(() => inputRef.current?.focus());
       return () => cancelAnimationFrame(id);
@@ -72,7 +83,8 @@ export function SearchDialog({
 
   // clamp active index to results
   useEffect(() => {
-    setActive(a => Math.min(a, Math.max(0, results.length - 1)));
+    if (results.length === 0) setActive(0);
+    else setActive(a => Math.min(a, Math.max(0, results.length - 1)));
   }, [results.length]);
 
   // lock body scroll
@@ -93,26 +105,28 @@ export function SearchDialog({
     el?.scrollIntoView({ block: "nearest" });
   }, [active]);
 
-  function onKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActive(a => (results.length ? (a + 1) % results.length : 0));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActive(a =>
-        results.length ? (a - 1 + results.length) % results.length : 0,
-      );
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (results[active]) select(results[active]);
-    }
-  }
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setActive(a => (results.length ? (a + 1) % results.length : 0));
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setActive(a =>
+          results.length ? (a - 1 + results.length) % results.length : 0,
+        );
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (results[active]) select(results[active]);
+      }
+    },
+    [results, active],
+  );
 
   function select(tool: Tool) {
     onOpenChange(false);
     const el = document.getElementById("trending");
     el?.scrollIntoView({ behavior: "smooth" });
-    // brief highlight ping via a custom event other components could listen to
     window.dispatchEvent(
       new CustomEvent("radarly:select-tool", { detail: tool.name }),
     );
@@ -147,7 +161,11 @@ export function SearchDialog({
             className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl shadow-black/30"
           >
             <div className="flex items-center gap-3 border-b border-border px-4">
-              <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+              {loading ? (
+                <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
+              ) : (
+                <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+              )}
               <input
                 ref={inputRef}
                 value={query}
@@ -170,11 +188,21 @@ export function SearchDialog({
             </div>
 
             <div ref={listRef} className="max-h-[52vh] overflow-y-auto p-2">
-              {results.length === 0 ? (
+              {!debounced ? (
+                <div className="px-4 py-12 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Type to search tools by name, category, or keyword.
+                  </p>
+                </div>
+              ) : loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : results.length === 0 ? (
                 <div className="px-4 py-12 text-center">
                   <p className="text-sm text-muted-foreground">
                     No tools match{" "}
-                    <span className="font-medium text-foreground">{`"${query}"`}</span>
+                    <span className="font-medium text-foreground">{`"${query.trim()}"`}</span>
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     Try a category like {'"'}coding{'"'} or {'"'}design{'"'}.

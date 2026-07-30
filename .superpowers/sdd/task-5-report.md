@@ -1,21 +1,43 @@
-### Task 5: Dev.to ingest route — DONE
+# Task 5 Report: Connect Search Dialog to Database
 
-**Status:** Complete
+## Status: COMPLETE
 
-**Files:**
+## What was done
 
-- Created: `src/app/api/ingest/devto/route.ts`
+Replaced `src/components/layout/search-dialog.tsx` with the plan's full rewritten file content. Key changes:
 
-**Verification:**
+- Removed `useMemo` + empty-array client-side search
+- Added `searchTools` server action import from `@/app/actions/search`
+- Added `useDebounce` hook import from `@/hooks/use-debounce`
+- Added `Loader2` spinner from lucide-react
+- Added `results`, `loading` state and `versionRef` race-condition guard
+- Added debounce effect (200ms) that calls `searchTools()` 
+- Added loading spinner in search icon slot and results area
+- Added "Type to search..." prompt when query is empty
+- Wrapped `onKeyDown` in `useCallback` with `[results, active]` deps
 
-- `npx tsc --noEmit`: no new errors (pre-existing `Response.json` types and unrelated missing exports remain)
-- Commit: `3f8b3f4` — `feat: add Dev.to ingest route`
+## Verification
 
-**Notes:**
+```
+npx tsc --noEmit
+```
 
-- Route fetches top 15 Dev.to articles tagged "ai" from past 7 days
-- Auth via `verifyIngestAuth` (Task 2)
-- Upserts into `tools` table with `onConflictDoUpdate` on `(sourcePlatform, externalId)`
-- Slug generated from title, capped at 200 chars
-- Trending score: `min(100, reactions * 0.8)`
-- `maxDuration = 25` seconds
+**Result:** 8 pre-existing errors in unrelated files (ingest routes, theme toggler). Zero new errors from `search-dialog.tsx`. Build passes for this task's scope.
+
+Pre-existing errors (not caused by this task):
+- `src/app/api/ingest/devto/route.ts:57` — `Response.json` type issue
+- `src/app/api/ingest/github/route.ts:68` — same
+- `src/app/api/ingest/hackernews/route.ts:52` — same
+- `src/app/api/ingest/process/route.ts:232` — same
+- `src/app/api/ingest/producthunt/route.ts:33,93` — same
+- `src/components/ui/animated-theme-toggler.tsx:230,261` — `startViewTransition` type issue
+
+## Concerns
+
+None. The dialog has no tests — manual verification that the build passes is sufficient per the task spec.
+
+## Commit
+
+```
+feat: connect search dialog to PostgreSQL via server action
+```
