@@ -37,7 +37,8 @@ export async function searchTools(query: string): Promise<Tool[]> {
       .limit(20);
 
     return rows.map(rowToTool);
-  } catch {
+  } catch (err) {
+    console.error("searchTools: database error", err);
     return [];
   }
 }
