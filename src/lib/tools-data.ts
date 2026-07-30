@@ -2,6 +2,7 @@ export type Signal = "rising" | "steady" | "hot";
 
 export type Tool = {
   name: string;
+  slug: string;
   hook: string;
   logo?: string;
   website?: string;
@@ -12,6 +13,8 @@ export type Tool = {
   spark: number[];
   /** where it was surfaced from */
   source: string;
+  description?: string;
+  lastUpdatedAt?: string;
 };
 
 export type Category = {
@@ -162,11 +165,47 @@ export type ToolDetail = {
   }[];
 };
 
-/** Deterministic pseudo-random helper so demo metadata is stable per tool. */
-function hash(str: string) {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
-  return h;
+export type ReviewData = {
+  id: string;
+  content: string;
+  createdAt: string;
+  likes: number;
+  dislikes: number;
+  userVote: number;
+  user: { name: string; id: string };
+};
+
+function timeAgo(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `${days}d ago`;
+  return `${Math.floor(days / 30)}mo ago`;
+}
+
+function sparkStats(spark: number[]) {
+  if (spark.length < 2) return { growth: 0, volatility: 0, trend: 0 };
+  const first = spark[0];
+  const last = spark[spark.length - 1];
+  const growth = Math.round(((last - first) / Math.max(1, first)) * 100);
+
+  let sumSq = 0;
+  for (let i = 1; i < spark.length; i++) {
+    sumSq += (spark[i] - spark[i - 1]) ** 2;
+  }
+  const volatility = Math.sqrt(sumSq / (spark.length - 1));
+
+  const half = Math.floor(spark.length / 2);
+  const recent = spark.slice(half);
+  const older = spark.slice(0, half);
+  const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
+  const olderAvg = older.reduce((a, b) => a + b, 0) / older.length;
+  const trend = olderAvg > 0 ? ((recentAvg - olderAvg) / olderAvg) * 100 : 0;
+
+  return { growth, volatility, trend };
 }
 
 const PLATFORMS = [
@@ -188,6 +227,13 @@ const REVIEWERS = [
   { author: "Sam Okafor", role: "Startup CTO" },
 ];
 
+// ponytail: hash stays for fields without real DB columns yet (pricing, platforms, bestFor, highlights, reviews)
+function hash(str: string) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return h;
+}
+
 export function getToolDetail(tool: Tool): ToolDetail {
   const h = hash(tool.name);
   const cat = CATEGORY_LABELS[tool.cat] ?? tool.cat;
@@ -197,13 +243,30 @@ export function getToolDetail(tool: Tool): ToolDetail {
     PLATFORMS[6 + (h % 3)],
   ];
   const uniquePlatforms = Array.from(new Set(platforms));
-  const first = tool.spark[0];
-  const last = tool.spark[tool.spark.length - 1];
-  const growth = Math.round(((last - first) / Math.max(1, first)) * 100);
+  const stats = sparkStats(tool.spark);
+
+  const website = tool.website ?? `https://${toolSlug(tool.name)}.example.com`;
+  const about =
+    tool.description ??
+    `${tool.name} is a ${cat.toLowerCase()} tool that surfaced on ${tool.source} and has been climbing our radar. It stands out for how quickly it turns intent into output, with a workflow that feels native to how people already work.`;
+  const lastScan = tool.lastUpdatedAt
+    ? timeAgo(tool.lastUpdatedAt)
+    : `${1 + (h % 9)}h ago`;
+
+  const momentum = tool.score;
+  const community = Math.round(Math.max(40, tool.score - stats.volatility * 3));
+  const retention =
+    stats.trend > 10
+      ? Math.min(100, Math.round(tool.score * 0.85 + stats.trend))
+      : Math.max(40, Math.round(tool.score * 0.75));
+  const sourceConf =
+    tool.spark.length >= 8
+      ? Math.min(100, Math.round(70 + tool.spark.length * 2))
+      : Math.round(50 + tool.spark.length * 3);
 
   return {
     tagline: tool.hook,
-    about: `${tool.name} is a ${cat.toLowerCase()} tool that surfaced on ${tool.source} and has been climbing our radar. It stands out for how quickly it turns intent into output, with a workflow that feels native to how people already work. We track its momentum across the sources that matter so you can decide whether it deserves a spot in your stack.`,
+    about,
     pricing: PRICING[h % 3],
     priceNote:
       PRICING[h % 3] === "Free"
@@ -212,8 +275,8 @@ export function getToolDetail(tool: Tool): ToolDetail {
           ? `Free tier · Pro from $${10 + (h % 20)}/mo`
           : `From $${15 + (h % 30)}/mo`,
     platforms: uniquePlatforms,
-    website: `https://${toolSlug(tool.name)}.example.com`,
-    lastScan: `${1 + (h % 9)}h ago`,
+    website,
+    lastScan,
     bestFor: [
       `${cat} teams shipping fast`,
       h % 2 === 0
@@ -223,38 +286,45 @@ export function getToolDetail(tool: Tool): ToolDetail {
     ],
     highlights: [
       {
-        title: "Fast to first result",
-        body: "Minimal setup — you get useful output within minutes of signing up.",
+        title: stats.trend > 15 ? "Accelerating fast" : "Steady growth",
+        body:
+          stats.trend > 15
+            ? `Momentum up ${Math.round(stats.trend)}% in recent weeks — clear adoption ramp.`
+            : `Consistent presence across tracked sources with ${Math.abs(Math.round(stats.trend))}% trend.`,
       },
       {
-        title: "Context-aware",
-        body: "Understands your project and intent instead of treating every request in isolation.",
+        title: "Category leader",
+        body: `Ranked in the top tier of ${cat.toLowerCase()} tools by community signal and discussion volume.`,
       },
       {
-        title: "Fits your stack",
-        body: `Works across ${uniquePlatforms.join(", ")} so it slots into existing tooling.`,
+        title:
+          stats.volatility > 12 ? "High discussion volume" : "Stable signal",
+        body:
+          stats.volatility > 12
+            ? `Generating significant conversation across sources — strong word-of-mouth indicator.`
+            : `Proven reliability with steady engagement — low volatility suggests a mature product.`,
       },
     ],
     scoreBreakdown: [
       {
         label: "Momentum",
-        value: tool.score,
+        value: momentum,
         note: "Velocity of mentions and signups",
       },
       {
         label: "Community buzz",
-        value: Math.max(40, tool.score - (h % 18)),
+        value: community,
         note: "Discussion volume across sources",
       },
       {
         label: "Retention signal",
-        value: Math.max(45, tool.score - (h % 12)),
+        value: retention,
         note: "Repeat usage and return rate",
       },
       {
         label: "Source confidence",
-        value: Math.max(55, tool.score - (h % 9)),
-        note: "How reliable our signal is",
+        value: sourceConf,
+        note: stats.trend >= 0 ? "Signal strengthening" : "Signal weakening",
       },
     ],
     reviews: [
@@ -278,21 +348,21 @@ export function getToolDetail(tool: Tool): ToolDetail {
       },
       {
         label: "30d growth",
-        value: `${growth >= 0 ? "+" : ""}${growth}%`,
+        value: `${stats.growth >= 0 ? "+" : ""}${stats.growth}%`,
         delta: "vs. prev",
-        trend: growth >= 0 ? "up" : "flat",
+        trend: stats.growth >= 0 ? "up" : "flat",
       },
       {
         label: "Sources tracking",
-        value: String(3 + (h % 4)),
+        value: String(Math.max(2, tool.spark.length)),
         delta: "live",
         trend: "up",
       },
       {
         label: "Community score",
-        value: `${Math.max(40, tool.score - (h % 15))}`,
-        delta: `+${1 + (h % 6)}%`,
-        trend: "up",
+        value: String(community),
+        delta: stats.trend >= 0 ? `+${Math.round(stats.trend)}%` : "steady",
+        trend: stats.trend >= 0 ? "up" : "flat",
       },
     ],
   };

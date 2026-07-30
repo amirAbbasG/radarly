@@ -1,10 +1,20 @@
 import "server-only";
 
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { tools } from "@/lib/db/schema";
+import {
+  tools,
+  toolReviews,
+  reviewVotes,
+  user as userTable,
+} from "@/lib/db/schema";
 import { sourceLabel } from "@/lib/ingest-utils";
-import type { Tool, ToolDetail, CategoryProfile } from "@/lib/tools-data";
+import type {
+  Tool,
+  ToolDetail,
+  CategoryProfile,
+  ReviewData,
+} from "@/lib/tools-data";
 import { CATEGORY_PROFILES } from "@/lib/tools-data";
 
 function rowToTool(row: typeof tools.$inferSelect): Tool {
@@ -12,6 +22,7 @@ function rowToTool(row: typeof tools.$inferSelect): Tool {
     (row.momentumHistory as { date: string; score: number }[]) ?? [];
   return {
     name: row.name,
+    slug: row.slug,
     hook: row.hook ?? "",
     logo: row.logo ?? undefined,
     website: row.website ?? undefined,
@@ -20,6 +31,8 @@ function rowToTool(row: typeof tools.$inferSelect): Tool {
     sig: (row.signal as Tool["sig"]) ?? "steady",
     spark: history.slice(-12).map(e => e.score),
     source: sourceLabel(row.sourcePlatform),
+    description: row.description ?? undefined,
+    lastUpdatedAt: row.lastUpdatedAt?.toISOString(),
   };
 }
 
@@ -93,6 +106,47 @@ export async function getToolOfWeek(): Promise<Tool | null> {
     .limit(1);
   if (rows.length === 0) return null;
   return rowToTool(rows[0]);
+}
+
+export async function getToolReviews(
+  toolSlug: string,
+  userId?: string,
+): Promise<ReviewData[]> {
+  const rows = await db
+    .select({
+      id: toolReviews.id,
+      content: toolReviews.content,
+      createdAt: toolReviews.createdAt,
+      userName: userTable.name,
+      userId: userTable.id,
+      likes: sql<number>`cast(coalesce(sum(case when ${reviewVotes.vote} = 1 then 1 else 0 end), 0) as int)`,
+      dislikes: sql<number>`cast(coalesce(sum(case when ${reviewVotes.vote} = -1 then 1 else 0 end), 0) as int)`,
+      userVote: userId
+        ? sql<number>`cast(coalesce(max(case when ${reviewVotes.userId} = ${userId} then ${reviewVotes.vote} else 0 end), 0) as int)`
+        : sql<number>`0`,
+    })
+    .from(toolReviews)
+    .leftJoin(userTable, eq(toolReviews.userId, userTable.id))
+    .leftJoin(reviewVotes, eq(toolReviews.id, reviewVotes.reviewId))
+    .where(eq(toolReviews.toolSlug, toolSlug))
+    .groupBy(
+      toolReviews.id,
+      userTable.name,
+      userTable.id,
+      toolReviews.content,
+      toolReviews.createdAt,
+    )
+    .orderBy(desc(toolReviews.createdAt));
+
+  return rows.map(r => ({
+    id: r.id,
+    content: r.content,
+    createdAt: r.createdAt.toISOString(),
+    likes: r.likes,
+    dislikes: r.dislikes,
+    userVote: r.userVote,
+    user: { name: r.userName!, id: r.userId! },
+  }));
 }
 
 export { getToolDetail } from "@/lib/tools-data";
