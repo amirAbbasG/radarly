@@ -582,7 +582,7 @@ export function ToolDetail({
                 Spotted something climbing faster? Put it on our radar.
               </p>
               <Link
-                href="/#newsletter"
+                href="/submit"
                 className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-secondary transition-colors hover:brightness-110"
               >
                 Submit a tool

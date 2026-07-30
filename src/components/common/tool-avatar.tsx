@@ -1,3 +1,5 @@
+"use client";
+
 function faviconUrl(url: string | null | undefined): string | undefined {
   if (!url) return undefined;
   try {

@@ -1,18 +1,24 @@
-### Task 2 Report: Shared ingest utilities
+# Task 2 Report: Export rowToTool
 
-**Status:** done
+## Status: Done
 
-**Commit:** `b318c84` — `feat: add shared ingest utility functions`
+## What was done
 
-**Files created:**
+Added `export` keyword to `rowToTool()` at `src/lib/data.ts:20`. No logic changes.
 
-- `src/lib/ingest-utils.ts` — 17 lines
+```ts
+// Before
+function rowToTool(row: typeof tools.$inferSelect): Tool {
 
-**Functions:**
+// After
+export function rowToTool(row: typeof tools.$inferSelect): Tool {
+```
 
-- `verifyIngestAuth(req: Request): Response | null` — checks Authorization header against `INGEST_SECRET`
-- `sourceLabel(platform: string): string` — maps `devto`/`hackernews`/`github`/`producthunt` to display names
+## Verification
 
-**TypeScript:** no new errors. Two pre-existing errors in `src/components/ui/animated-theme-toggler.tsx` (`startViewTransition` on `Document`) — unrelated to this task.
+- `npx tsc --noEmit`: 8 pre-existing errors (ingest route `Response.json`, `startViewTransition`). Zero new errors from this change.
+- Commit: `af5f0d5` — `refactor: export rowToTool for reuse`
 
-**Concerns:** none.
+## Concerns
+
+None.

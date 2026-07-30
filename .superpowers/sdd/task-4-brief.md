@@ -1,36 +1,69 @@
-﻿### Task 4: Refactor tools-data.ts (types only, no mock data)
+### Task 4: Server Action for Search
 
 **Files:**
-- Modify: src/lib/tools-data.ts
 
-**Produces:** type exports, CATEGORIES, CATEGORY_LABELS, CATEGORY_PROFILES, toolSlug(), getToolDetail()
+- Create: `src/app/actions/search.ts`
 
-- [ ] **Step 1: Remove mock data arrays, keep types and pure functions**
+**Interfaces:**
 
-In src/lib/tools-data.ts, delete:
-- The `spark()` function (lines 140-148)
-- The `TOOLS` array (lines 150-349)
-- The `getToolBySlug()` and `getRelatedTools()` functions (lines 358-368)
-- The `TOOL_OF_WEEK` object (lines 532-543)
-- The `SOURCES` array (lines 545-552)
+- Consumes: `rowToTool` from `src/lib/data.ts`, `db` from `src/lib/db`, `tools` schema from `src/lib/db/schema`
+- Produces: `searchTools(query: string): Promise<Tool[]>` — returns ranked published tools matching query, empty array for empty query
 
-Keep everything else: type definitions (Tool, Signal, Category, CategoryProfile, ToolDetail), CATEGORIES array, CATEGORY_PROFILES array, CATEGORY_LABELS, toolSlug(), getToolDetail(), getCategoryProfile(), getCategoryTools(), getRelatedCategories(), hash().
+- [ ] **Step 1: Create the server action**
 
-Add this re-export at the end of the file:
 ```ts
-export { getAllTools, getToolBySlug, getCategoryTools, getRelatedTools, getCategoryProfiles, getToolOfWeek, getToolDetail } from "./data";
+"use server";
+
+import { eq, desc, sql, or } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { tools } from "@/lib/db/schema";
+import { rowToTool } from "@/lib/data";
+import type { Tool } from "@/lib/tools-data";
+
+export async function searchTools(query: string): Promise<Tool[]> {
+  const q = query.trim();
+  if (!q) return [];
+
+  try {
+    const rows = await db
+      .select()
+      .from(tools)
+      .where(
+        or(
+          sql`similarity(${tools.name}, ${q}) > 0.1`,
+          sql`similarity(${tools.hook}, ${q}) > 0.1`,
+          sql`similarity(${tools.description}, ${q}) > 0.1`,
+        ),
+      )
+      .orderBy(
+        desc(
+          sql`greatest(
+            similarity(${tools.name}, ${q}),
+            similarity(${tools.hook}, ${q}),
+            similarity(${tools.description}, ${q})
+          )`,
+        ),
+      )
+      .limit(20);
+
+    return rows.map(rowToTool);
+  } catch {
+    return [];
+  }
+}
 ```
 
-- [ ] **Step 2: Verify TypeScript (both tools-data.ts and data.ts)**
-```bash
-npx tsc --noEmit
-```
-Expected: no errors.
+- [ ] **Step 2: Verify build**
+
+Run: `npx tsc --noEmit`
+Expected: No errors.
 
 - [ ] **Step 3: Commit**
+
 ```bash
-git add src/lib/tools-data.ts
-git commit -m "refactor: remove mock data, re-export from data layer"
+git add src/app/actions/search.ts
+git commit -m "feat: add server-side pg_trgm search action"
 ```
 
 ---
+

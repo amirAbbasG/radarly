@@ -1,30 +1,39 @@
-# Task 1 Report — Database schema (tools table)
+# Task 1 Report: PostgreSQL pg_trgm Migration
 
-**Status:** ✅ Complete
+**Status:** Complete
+
+## Summary
+
+Created and applied migration `0003_pg_trgm_search.sql` enabling the `pg_trgm` PostgreSQL extension and a GIN trigram index on the `tools` table.
 
 ## Changes
 
-- **Modified:** `src/lib/db/schema.ts`
-  - Added `integer`, `jsonb`, `pgEnum`, `unique` to drizzle imports
-  - Added `statusEnum` — pgEnum with values `["pending_summary", "published", "archived"]`
-  - Added `tools` table — 17 columns, unique constraint on `(source_platform, external_id)`
-  - Existing tables (user, session, account, verification, toolSubmissions) untouched
+- **Created:** `drizzle/0003_pg_trgm_search.sql`
+  - `CREATE EXTENSION IF NOT EXISTS pg_trgm`
+  - `CREATE INDEX IF NOT EXISTS tools_search_trgm_idx ON tools USING gin (name gin_trgm_ops, hook gin_trgm_ops, description gin_trgm_ops)`
 
-- **Generated:** `drizzle/0000_pale_gambit.sql` — migration SQL
-- **Generated:** `drizzle/meta/0000_snapshot.json`, `drizzle/meta/_journal.json`
+## Migration
 
-## Verification
-
-- `npx drizzle-kit generate` — ✅ 6 tables detected, migration created
-- `npx drizzle-kit migrate` — ✅ applied successfully
-- `npx tsc --noEmit` — schema compiles clean. 2 pre-existing TS errors in `src/components/ui/animated-theme-toggler.tsx` (unrelated — `startViewTransition` type missing)
+```
+npx drizzle-kit migrate — applied successfully, no errors.
+```
 
 ## Commit
 
-- **Hash:** `3d09952`
-- **Message:** `feat: add tools table and status enum to schema`
-- **Files:** 4 files changed, 701 insertions(+), 1 deletion(-)
+```
+4d0cafc feat: add pg_trgm extension and search index on tools
+```
+
+## Test Summary
+
+No test framework installed. Migration applied directly via `drizzle-kit migrate` — verified successful execution.
 
 ## Concerns
 
-None. Schema adds cleanly alongside existing auth tables.
+None. Migration is idempotent (`IF NOT EXISTS`), safe to re-run.
+
+## Interfaces Produced
+
+- `pg_trgm` extension enabled
+- GIN trgm index `tools_search_trgm_idx` on `tools(name, hook, description)`
+- Ready for Task 4 (search action using `similarity()`)

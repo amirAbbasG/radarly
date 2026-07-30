@@ -2,6 +2,7 @@ import { ArrowUpRight, Trophy } from "lucide-react";
 import { Sparkline } from "@/components/common/sparkline";
 import { NumberTicker } from "@/components/common/number-ticker";
 import { Reveal } from "@/components/common/reveal";
+import { ToolAvatar } from "@/components/common/tool-avatar";
 import type { Tool } from "@/lib/tools-data";
 
 export function ToolOfWeek({ tool }: { tool: Tool | null }) {
@@ -20,9 +21,17 @@ export function ToolOfWeek({ tool }: { tool: Tool | null }) {
                 <Trophy className="h-3.5 w-3.5" />
                 Tool of the Week
               </span>
-              <h2 className="font-heading text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-                {t.name}
-              </h2>
+              <div className="flex items-center gap-4">
+                <ToolAvatar
+                  name={t.name}
+                  logo={t.logo}
+                  website={t.website}
+                  size="lg"
+                />
+                <h2 className="font-heading text-3xl font-bold tracking-tight text-balance sm:text-4xl">
+                  {t.name}
+                </h2>
+              </div>
               <p className="mt-3 max-w-lg text-pretty leading-relaxed text-muted-foreground">
                 {t.hook}
               </p>

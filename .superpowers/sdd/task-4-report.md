@@ -1,21 +1,44 @@
-# Task 4 — Fix Report
+# Task 4 Report: Server Action for Search
 
-## Fix 1: Removed `server-only` leak via re-export
+## Status: Done
 
-**Problem:** `tools-data.ts` re-exported `getAllTools`, `getToolBySlug`, `getCategoryTools`, `getRelatedTools`, `getCategoryProfiles`, `getToolOfWeek` from `./data`. Since `data.ts` imports `import "server-only"` at the top, any client component importing from `tools-data.ts` would transitively trigger `server-only`, crashing the build.
+## Commits
 
-**Fix:** Removed the 7-line re-export block (lines 305–312). Client components now import types/utils from `tools-data.ts` and async data functions directly from `@/lib/data` (server-only safe). Consumer files (trending-feed, tool-of-week, trust-strip, search-dialog, page.tsx, etc.) are fixed in later tasks.
+- `f8e158f` — feat: add server-side pg_trgm search action
 
-## Fix 2: Removed `getRelatedCategories`
+## Summary
 
-**Problem:** `getRelatedCategories` existed in `tools-data.ts` but its mock data dependency was deleted during earlier refactoring.
+Created `src/app/actions/search.ts` with `searchTools(query: string): Promise<Tool[]>`.
 
-**Fix:** Removed the function (was lines 130–134). It is now provided by `data.ts` or consumers import directly. `getCategoryProfile` kept — it only depends on `CATEGORY_PROFILES` constant which was preserved.
+The action:
+- Trims input, returns `[]` for empty query
+- Queries published tools only (`eq(tools.status, "published")`)
+- Uses `pg_trgm` `similarity()` on name, hook, description fields (threshold > 0.1)
+- Ranks by greatest similarity across the three fields, then by `trendingScore` descending
+- Limits to 20 results
+- Maps rows via `rowToTool()` to `Tool[]`
+- Returns `[]` on error (silent catch)
 
-## Verification
+## Interface
 
-```
-npx tsc --noEmit — 0 errors in tools-data.ts
-```
+- Consumes: `rowToTool` from `src/lib/data.ts`, `db` from `src/lib/db`, `tools` schema from `src/lib/db/schema`
+- Produces: `searchTools(query: string): Promise<Tool[]>`
+- Consumed by: Task 5 — search dialog calls `searchTools(debounced)`
 
-File length: 312 → 297 lines (-15).
+## Deviation from brief
+
+Brief code missed two requirements implied by the spec text:
+1. Filter to `status = "published"` (matches pattern in `getAllTools`, `getToolOfWeek`, etc.)
+2. Secondary sort by `trendingScore` (spec says "ranked by relevance then trending score")
+
+Both added.
+
+## Test Summary
+
+TypeScript compilation: no errors in the new file. 8 pre-existing errors unrelated to this task.
+
+No automated test framework found in the project; manual verification via Task 5 integration.
+
+## Concerns
+
+None.
