@@ -14,30 +14,21 @@ import {
   Minus,
   Share2,
   Sparkles,
-  ThumbsUp,
   TrendingUp,
 } from "lucide-react";
 import { Sparkline } from "@/components/common/sparkline";
 import { MomentumChart } from "@/features/tool-detail/momentum-chart";
+import { ReviewSection } from "./review-section";
 import {
   CATEGORY_LABELS,
   type Tool,
   type ToolDetail as ToolDetailData,
+  type ReviewData,
 } from "@/lib/tools-data";
 import { ToolAvatar } from "@/components/common/tool-avatar";
 import { RelatedCard } from "@/features/tool-detail/related-card";
 import { SIGNAL_CONFIG } from "@/lib/signal";
 import { toggleSave, castVote } from "@/app/actions/tool-interactions";
-
-function initials(name: string) {
-  return name
-    .replace(/[^a-zA-Z0-9 ]/g, "")
-    .split(" ")
-    .map(w => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -77,12 +68,16 @@ export function ToolDetail({
   related,
   rank,
   interactionState,
+  reviews,
+  isAuthenticated,
 }: {
   tool: Tool;
   detail: ToolDetailData;
   related: Tool[];
   rank: number;
   interactionState: { saved: boolean; voted: boolean; voteCount: number };
+  reviews: ReviewData[];
+  isAuthenticated: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: containerRef });
@@ -504,30 +499,14 @@ export function ToolDetail({
           {/* community */}
           <Section>
             <div id="community" className="scroll-mt-32">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <h2 className="font-heading text-xl font-bold text-foreground">
-                  Community
-                </h2>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={handleVote}
-                    aria-pressed={voted}
-                    className={
-                      "inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors " +
-                      (voted
-                        ? "border-secondary bg-secondary/10 text-secondary"
-                        : "border-border text-muted-foreground hover:text-foreground")
-                    }
-                  >
-                    <ThumbsUp
-                      className={"size-4 " + (voted ? "fill-current" : "")}
-                    />
-                    Useful
-                    <span className="tabular-nums">{voteCount}</span>
-                  </button>
-                </div>
-              </div>
+              <ReviewSection
+                toolSlug={tool.slug}
+                initialReviews={reviews}
+                isAuthenticated={isAuthenticated}
+                voted={voted}
+                voteCount={voteCount}
+                onToolVote={handleVote}
+              />
             </div>
           </Section>
 
