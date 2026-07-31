@@ -4,44 +4,51 @@ on:
     - cron: "0 */12 * * *"
   workflow_dispatch:
 
+# Provide APP_URL and INGEST_SECRET to all jobs via env; these are populated from repo Variables/Secrets.
+env:
+  APP_URL: ${{ vars.APP_URL }}
+  INGEST_SECRET: ${{ secrets.INGEST_SECRET }}
+
 jobs:
   devto:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          curl -fsS \
-            -H "Authorization: Bearer ${{ secrets.INGEST_SECRET }}" \
-            "${{ vars.APP_URL }}/api/ingest/devto"
+          if [ -z "${APP_URL}" ]; then
+            echo "ERROR: APP_URL is not set (repo variable 'APP_URL'). Add it under Settings → Secrets and variables → Actions → Variables."
+            exit 1
+          fi
+          if [ -z "${INGEST_SECRET}" ]; then
+            echo "ERROR: INGEST_SECRET is not set (repo secret 'INGEST_SECRET'). Add it under Settings → Secrets and variables → Actions → Secrets."
+            exit 1
+          fi
+          curl -fsS -H "Authorization: Bearer ${INGEST_SECRET}" "${APP_URL}/api/ingest/devto"
 
   hackernews:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          curl -fsS \
-            -H "Authorization: Bearer ${{ secrets.INGEST_SECRET }}" \
-            "${{ vars.APP_URL }}/api/ingest/hackernews"
+          if [ -z "${APP_URL}" ] || [ -z "${INGEST_SECRET}" ]; then
+            echo "Missing APP_URL or INGEST_SECRET; aborting."
+            exit 1
+          fi
+          curl -fsS -H "Authorization: Bearer ${INGEST_SECRET}" "${APP_URL}/api/ingest/hackernews"
 
   github:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          curl -fsS \
-            -H "Authorization: Bearer ${{ secrets.INGEST_SECRET }}" \
-            "${{ vars.APP_URL }}/api/ingest/github"
+          curl -fsS -H "Authorization: Bearer ${INGEST_SECRET}" "${APP_URL}/api/ingest/github"
 
   producthunt:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          curl -fsS \
-            -H "Authorization: Bearer ${{ secrets.INGEST_SECRET }}" \
-            "${{ vars.APP_URL }}/api/ingest/producthunt"
+          curl -fsS -H "Authorization: Bearer ${INGEST_SECRET}" "${APP_URL}/api/ingest/producthunt"
 
   process:
     needs: [devto, hackernews, github, producthunt]
     runs-on: ubuntu-latest
     steps:
       - run: |
-          curl -fsS \
-            -H "Authorization: Bearer ${{ secrets.INGEST_SECRET }}" \
-            "${{ vars.APP_URL }}/api/ingest/process"
+          curl -fsS -H "Authorization: Bearer ${INGEST_SECRET}" "${APP_URL}/api/ingest/process"
