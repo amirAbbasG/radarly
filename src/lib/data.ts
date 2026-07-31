@@ -29,7 +29,14 @@ export function rowToTool(row: typeof tools.$inferSelect): Tool {
     cat: row.category ?? "coding",
     score: row.trendingScore ?? 0,
     sig: (row.signal as Tool["sig"]) ?? "steady",
-    spark: history.slice(-12).map(e => e.score),
+    spark: (() => {
+      const pts = history.map(e => e.score);
+      if (pts.length < 2) {
+        const v = pts[0] ?? 0;
+        return [v, v]; // ponytail: flat line until 2+ entries accumulate
+      }
+      return pts.slice(-12);
+    })(),
     source: sourceLabel(row.sourcePlatform),
     description: row.description ?? undefined,
     lastUpdatedAt: row.lastUpdatedAt?.toISOString(),
