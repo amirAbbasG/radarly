@@ -1,32 +1,47 @@
 name: Ingest tools
 on:
   schedule:
-    - cron: ${{ vars.INGEST_CRON || '0 */12 * * *' }}
+    - cron: "0 */12 * * *"
   workflow_dispatch:
 
 jobs:
   devto:
     runs-on: ubuntu-latest
     steps:
-      - run: curl -fsS -H "Authorization: Bearer ${{ secrets.INGEST_SECRET }}" "${{ vars.APP_URL }}/api/ingest/devto"
+      - run: |
+          curl -fsS \
+            -H "Authorization: Bearer ${{ secrets.INGEST_SECRET }}" \
+            "${{ vars.APP_URL }}/api/ingest/devto"
 
   hackernews:
     runs-on: ubuntu-latest
     steps:
-      - run: curl -fsS -H "Authorization: Bearer ${{ secrets.INGEST_SECRET }}" "${{ vars.APP_URL }}/api/ingest/hackernews"
+      - run: |
+          curl -fsS \
+            -H "Authorization: Bearer ${{ secrets.INGEST_SECRET }}" \
+            "${{ vars.APP_URL }}/api/ingest/hackernews"
 
   github:
     runs-on: ubuntu-latest
     steps:
-      - run: curl -fsS -H "Authorization: Bearer ${{ secrets.INGEST_SECRET }}" "${{ vars.APP_URL }}/api/ingest/github"
+      - run: |
+          curl -fsS \
+            -H "Authorization: Bearer ${{ secrets.INGEST_SECRET }}" \
+            "${{ vars.APP_URL }}/api/ingest/github"
 
   producthunt:
     runs-on: ubuntu-latest
     steps:
-      - run: curl -fsS -H "Authorization: Bearer ${{ secrets.INGEST_SECRET }}" "${{ vars.APP_URL }}/api/ingest/producthunt"
+      - run: |
+          curl -fsS \
+            -H "Authorization: Bearer ${{ secrets.INGEST_SECRET }}" \
+            "${{ vars.APP_URL }}/api/ingest/producthunt"
 
   process:
     needs: [devto, hackernews, github, producthunt]
     runs-on: ubuntu-latest
     steps:
-      - run: curl -fsS -H "Authorization: Bearer ${{ secrets.INGEST_SECRET }}" "${{ vars.APP_URL }}/api/ingest/process"
+      - run: |
+          curl -fsS \
+            -H "Authorization: Bearer ${{ secrets.INGEST_SECRET }}" \
+            "${{ vars.APP_URL }}/api/ingest/process"
