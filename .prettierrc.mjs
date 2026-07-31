@@ -19,9 +19,6 @@ export default {
     "^@/components(/.*)$", // Components
     "^@/hooks(/.*)$",
     "^@/lib(/.*)$",
-    "^@/stores(/.*)$",
-    "^@/i18n(/.*)$",
-    "^@/constants(/.*)$",
     "^@/(.*)$",
     "",
     "^[./]",

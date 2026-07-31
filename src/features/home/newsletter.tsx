@@ -1,17 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { startTransition, useActionState, useEffect, useState } from "react";
 import { Check, Mail } from "lucide-react";
+import { toast } from "sonner";
 import { Reveal } from "@/components/common/reveal";
+import { subscribeToNewsletter } from "@/app/actions/newsletter";
+import type { NewsletterState } from "@/app/actions/newsletter";
 
 export function Newsletter() {
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
+  const [state, formAction, isPending] = useActionState(subscribeToNewsletter, {
+    success: false,
+  } as NewsletterState);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (state.success) setDone(true);
+    else if (state.message) toast.error(state.message);
+  }, [state.success, state.message]);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!email) return;
-    setDone(true);
+    const fd = new FormData();
+    fd.set("email", email);
+    startTransition(() => formAction(fd));
   }
 
   return (
@@ -55,9 +69,10 @@ export function Newsletter() {
                 />
                 <button
                   type="submit"
-                  className="inline-flex h-11 items-center justify-center rounded-xl bg-secondary px-6 text-sm font-semibold text-secondary-foreground transition-all hover:brightness-110 active:scale-95"
+                  disabled={isPending}
+                  className="inline-flex h-11 items-center justify-center rounded-xl bg-secondary px-6 text-sm font-semibold text-secondary-foreground transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
                 >
-                  Subscribe
+                  {isPending ? "Subscribing…" : "Subscribe"}
                 </button>
               </form>
             )}

@@ -183,3 +183,11 @@ export const reviewVotes = pgTable(
     uniqueVote: unique().on(table.reviewId, table.userId),
   }),
 );
+
+export const newsletterSubscribers = pgTable("newsletter_subscribers", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  unsubToken: text("unsub_token").notNull().unique(),
+  subscribedAt: timestamp("subscribed_at").notNull().defaultNow(),
+  unsubscribedAt: timestamp("unsubscribed_at"),
+});
