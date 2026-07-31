@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function RadarMark({ className }: { className?: string }) {
   return (
     <svg
@@ -36,7 +38,7 @@ export function RadarMark({ className }: { className?: string }) {
 
 export function Logo({ className }: { className?: string }) {
   return (
-    <a
+    <Link
       href="/"
       className={"flex items-center gap-2 " + (className ?? "")}
     >
@@ -44,6 +46,6 @@ export function Logo({ className }: { className?: string }) {
       <span className="font-heading text-lg font-bold tracking-tight text-foreground">
         Radarly
       </span>
-    </a>
+    </Link>
   );
 }

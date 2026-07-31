@@ -15,7 +15,6 @@ export function Newsletter() {
   } as NewsletterState);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (state.success) setDone(true);
     else if (state.message) toast.error(state.message);
   }, [state.success, state.message]);

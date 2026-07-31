@@ -1,6 +1,6 @@
 import "server-only";
 
-import { eq, desc, sql, and } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   tools,
@@ -11,7 +11,6 @@ import {
 import { sourceLabel } from "@/lib/ingest-utils";
 import type {
   Tool,
-  ToolDetail,
   CategoryProfile,
   ReviewData,
 } from "@/lib/tools-data";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { Tool, Category } from "@/lib/tools-data";
 import { sparkStats } from "@/lib/tools-data";
@@ -45,7 +45,7 @@ export function TrendingFeed({
       );
     }
     return list;
-  }, [cat, sort]);
+  }, [cat, sort, tools]);
 
   const shown = filtered.slice(0, visible);
 

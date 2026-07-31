@@ -88,7 +88,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-sm flex-col gap-6">
       {/* Header */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -104,7 +104,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
           </h1>
           <p className="leading-relaxed text-muted-foreground">
             {isSignUp
-              ? "Start tracking what's rising in AI, tuned to your radar."
+              ? "Start tracking what's rising in AI"
               : "Sign in to pick up your saved tools and personalized feed."}
           </p>
         </motion.div>
@@ -120,6 +120,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
             onClick={() => handleSocialSignIn("github")}
             className="h-11"
           >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="https://thesvg.org/icons/github/default.svg"
               alt=""
@@ -136,6 +137,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
             onClick={() => handleSocialSignIn("google")}
             className="h-11"
           >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="https://thesvg.org/icons/google/color.svg"
               alt=""

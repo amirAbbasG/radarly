@@ -1,4 +1,5 @@
 import { RadarMark } from "@/components/common/logo";
+import Link from "next/link";
 
 const COLS = [
   {
@@ -36,12 +37,12 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-10">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
           <div className="col-span-2">
-            <a href="/" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
               <RadarMark className="h-6 w-6 text-secondary" />
               <span className="font-heading text-lg font-bold tracking-tight text-foreground">
                 Radarly
               </span>
-            </a>
+            </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
               The signal, not the noise. Trending AI tools ranked by real
               momentum, scanned daily so you don&apos;t have to.

@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   ArrowRight,
   BarChart3,
-  Flame,
   Radio,
   Search,
   SlidersHorizontal,

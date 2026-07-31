@@ -12,7 +12,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
       <div className="mx-auto grid min-h-[calc(100svh-1.5rem)] max-w-7xl grid-cols-1 gap-6 sm:min-h-[calc(100svh-2.5rem)] lg:min-h-[calc(100svh-3rem)] lg:grid-cols-[minmax(0,1.05fr)_minmax(420px,0.95fr)]">
         <AuthShowcase />
 
-        <section className="relative flex min-h-[calc(100svh-1.5rem)] flex-col rounded-3xl bg-card px-5 py-5 ring-1 ring-foreground/10 sm:min-h-[calc(100svh-2.5rem)] sm:px-10 sm:py-7 lg:min-h-0 lg:px-12 xl:px-16">
+        <section className="relative flex min-h-[calc(100svh-1.5rem)] flex-col rounded-3xl bg-card px-5 py-5 ring-1 ring-foreground/10 sm:min-h-[calc(100svh-2.5rem)] sm:px-8 sm:py-7 lg:min-h-0 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="lg:hidden">
               <Logo />
@@ -26,7 +26,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
             </Link>
           </div>
 
-          <div className="flex flex-1 items-center py-12 sm:py-16 lg:py-10">
+          <div className="flex flex-1 items-center py-6">
             <AuthForm mode={mode} />
           </div>
 

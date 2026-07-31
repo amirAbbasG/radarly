@@ -28,6 +28,7 @@ import {
   RevealStagger,
   itemVariants,
 } from "@/components/common/reveal";
+import Link from "next/link";
 
 const STATS = [
   { value: "2,400+", label: "Tools tracked" },
@@ -378,7 +379,7 @@ export function AboutPage() {
               <Button
                 size="lg"
                 variant="secondary"
-                render={<a href="/#trending" />}
+                render={<Link href="/#trending" />}
               >
                 Explore the radar
                 <ArrowRight data-icon="inline-end" />
@@ -386,7 +387,7 @@ export function AboutPage() {
               <Button
                 size="lg"
                 variant="outline"
-                render={<a href="/#newsletter" />}
+                render={<Link href="/#newsletter" />}
               >
                 <MessagesSquare data-icon="inline-start" />
                 Suggest a tool

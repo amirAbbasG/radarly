@@ -48,6 +48,7 @@ export function ToolAvatar({
     >
       {initials(name)}
       {(logo || website) && (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={logo ?? faviconUrl(website)}
           alt=""

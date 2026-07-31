@@ -68,7 +68,7 @@ export function AuthShowcase() {
         />
       </div>
 
-      <div className="relative flex flex-1 flex-col justify-between p-10 xl:p-12">
+      <div className="relative flex flex-1 flex-col justify-between p-8">
         <div className="flex items-center gap-2">
           <RadarMark className="h-7 w-7 text-secondary" />
           <span className="font-heading text-xl font-bold tracking-tight text-foreground">

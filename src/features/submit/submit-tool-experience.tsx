@@ -18,6 +18,7 @@ import {
   submitTool,
   type SubmissionState,
 } from "@/app/actions/tool-submissions";
+import Link from "next/link";
 
 const CATEGORIES = [
   "AI assistants",
@@ -129,12 +130,12 @@ export function SubmitToolExperience() {
                 <Send className="h-4 w-4" />
                 Submit another tool
               </Button>
-              <a
+              <Link
                 href="/#trending"
                 className="inline-flex h-9 items-center justify-center rounded-lg border border-border bg-background px-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 Browse the radar
-              </a>
+              </Link>
             </div>
           </motion.div>
         </div>

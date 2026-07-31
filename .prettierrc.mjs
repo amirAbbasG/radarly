@@ -1,5 +1,5 @@
 /** @type {import("prettier").Config} */
-export default {
+const config =  {
   semi: true,
   printWidth: 80,
   tabWidth: 2,
@@ -27,3 +27,5 @@ export default {
   ],
   tailwindFunctions: ["cn", "cva"],
 };
+
+export default config;

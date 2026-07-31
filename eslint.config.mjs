@@ -21,8 +21,8 @@ const eslintConfig = defineConfig([
       react: { version: "19" },
     },
     rules: {
-      "set-state-in-effect": "off"
-    }
+      "react-hooks/set-state-in-effect": "off",
+    },
   },
 ]);
 
