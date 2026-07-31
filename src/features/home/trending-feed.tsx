@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { Tool, Category } from "@/lib/tools-data";
+import { sparkStats } from "@/lib/tools-data";
 import { ToolCard } from "@/components/common/tool-card";
 import { Reveal } from "@/components/common/reveal";
 
@@ -27,8 +28,16 @@ export function TrendingFeed({
 
   const filtered = useMemo(() => {
     let list = tools.filter(t => cat === "all" || t.cat === cat);
-    if (sort === "score" || sort === "trending") {
+    if (sort === "score") {
       list = [...list].sort((a, b) => b.score - a.score);
+    } else if (sort === "trending") {
+      const momentum = new Map(
+        list.map(t => [t.name, sparkStats(t.spark).trend]),
+      );
+      list = [...list].sort(
+        (a, b) =>
+          momentum.get(b.name)! - momentum.get(a.name)! || b.score - a.score,
+      );
     } else if (sort === "rising") {
       const rank = { hot: 3, rising: 2, steady: 1 };
       list = [...list].sort(

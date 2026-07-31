@@ -185,7 +185,7 @@ export function timeAgo(iso: string): string {
   return `${Math.floor(days / 30)}mo ago`;
 }
 
-function sparkStats(spark: number[]) {
+export function sparkStats(spark: number[]) {
   if (spark.length < 2) return { growth: 0, volatility: 0, trend: 0 };
   const first = spark[0];
   const last = spark[spark.length - 1];
