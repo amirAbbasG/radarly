@@ -1,3 +1,4 @@
+import { eq, and } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { tools } from "@/lib/db/schema";
 import { verifyIngestAuth } from "@/lib/ingest-utils";
@@ -46,6 +47,16 @@ export async function GET(req: Request) {
   });
 
   const json = await res.json();
+  if (!res.ok || json.errors) {
+    console.error(
+      `[producthunt] API error: ${res.status}`,
+      json.errors ?? json,
+    );
+    return Response.json(
+      { ok: false, source: "producthunt", error: `API error` },
+      { status: 502 },
+    );
+  }
   const nodes: {
     id: string;
     name: string;
@@ -56,6 +67,8 @@ export async function GET(req: Request) {
     thumbnail: { url: string } | null;
   }[] = json.data?.posts?.edges?.map((e: { node: unknown }) => e.node) ?? [];
 
+  console.log(`[producthunt] fetched ${nodes.length} posts`);
+
   let inserted = 0;
   for (const p of nodes) {
     const slug = p.name
@@ -64,6 +77,19 @@ export async function GET(req: Request) {
       .replace(/(^-|-$)/g, "")
       .slice(0, 120);
     const score = Math.min(100, Math.round(p.votesCount * 0.2));
+
+    const existing = await db
+      .select({ slug: tools.slug })
+      .from(tools)
+      .where(
+        and(
+          eq(tools.sourcePlatform, "producthunt"),
+          eq(tools.externalId, p.id),
+        ),
+      )
+      .limit(1);
+
+    const action = existing.length > 0 ? "UPDATE" : "INSERT";
 
     await db
       .insert(tools)
@@ -87,6 +113,7 @@ export async function GET(req: Request) {
           lastUpdatedAt: new Date(),
         },
       });
+    console.log(`[producthunt] ${action} | score=${score} | ${p.name}`);
     inserted++;
   }
 

@@ -1,3 +1,4 @@
+import { eq, and } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { tools } from "@/lib/db/schema";
 import { verifyIngestAuth } from "@/lib/ingest-utils";
@@ -28,7 +29,16 @@ export async function GET(req: Request) {
     },
   );
   const data = await res.json();
+  if (!res.ok) {
+    console.error(`[github] API error: ${res.status}`, data);
+    return Response.json(
+      { ok: false, source: "github", error: `API returned ${res.status}` },
+      { status: 502 },
+    );
+  }
   const repos: GHRepo[] = data.items ?? [];
+
+  console.log(`[github] fetched ${repos.length} repos`);
 
   let inserted = 0;
   for (const r of repos) {
@@ -40,6 +50,19 @@ export async function GET(req: Request) {
       100,
       Math.round(Math.log2(r.stargazers_count + 1) * 10),
     );
+
+    const existing = await db
+      .select({ slug: tools.slug })
+      .from(tools)
+      .where(
+        and(
+          eq(tools.sourcePlatform, "github"),
+          eq(tools.externalId, String(r.id)),
+        ),
+      )
+      .limit(1);
+
+    const action = existing.length > 0 ? "UPDATE" : "INSERT";
 
     await db
       .insert(tools)
@@ -62,6 +85,7 @@ export async function GET(req: Request) {
           lastUpdatedAt: new Date(),
         },
       });
+    console.log(`[github] ${action} | score=${score} | ${r.full_name}`);
     inserted++;
   }
 

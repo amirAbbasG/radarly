@@ -153,6 +153,8 @@ export async function GET(req: Request) {
     .orderBy(asc(tools.firstSeenAt))
     .limit(50);
 
+  console.log(`[process] found ${rows.length} pending tools`);
+
   let processed = 0;
   let geminiCount = 0;
   let mistralCount = 0;
@@ -226,6 +228,9 @@ export async function GET(req: Request) {
       })
       .where(eq(tools.id, row.id));
 
+    console.log(
+      `[process] published | ${row.name} | cat=${category} | signal=${signal}`,
+    );
     processed++;
   }
 

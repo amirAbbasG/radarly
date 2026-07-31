@@ -1,3 +1,4 @@
+import { eq, and } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { tools } from "@/lib/db/schema";
 import { verifyIngestAuth } from "@/lib/ingest-utils";
@@ -18,8 +19,17 @@ export async function GET(req: Request) {
   const res = await fetch(
     "https://hn.algolia.com/api/v1/search?query=AI+tool&tags=show_hn&hitsPerPage=15",
   );
+  if (!res.ok) {
+    console.error(`[hackernews] API error: ${res.status}`);
+    return Response.json(
+      { ok: false, source: "hackernews", error: `API returned ${res.status}` },
+      { status: 502 },
+    );
+  }
   const data = await res.json();
   const hits: HNHit[] = data.hits ?? [];
+
+  console.log(`[hackernews] fetched ${hits.length} hits`);
 
   let inserted = 0;
   for (const h of hits) {
@@ -30,6 +40,19 @@ export async function GET(req: Request) {
       .replace(/(^-|-$)/g, "")
       .slice(0, 120);
     const score = Math.min(100, Math.round(h.points * 0.35));
+
+    const existing = await db
+      .select({ slug: tools.slug })
+      .from(tools)
+      .where(
+        and(
+          eq(tools.sourcePlatform, "hackernews"),
+          eq(tools.externalId, h.objectID),
+        ),
+      )
+      .limit(1);
+
+    const action = existing.length > 0 ? "UPDATE" : "INSERT";
 
     await db
       .insert(tools)
@@ -46,6 +69,9 @@ export async function GET(req: Request) {
         target: [tools.sourcePlatform, tools.externalId],
         set: { trendingScore: score, lastUpdatedAt: new Date() },
       });
+    console.log(
+      `[hackernews] ${action} | score=${score} | ${h.title.slice(0, 80)}`,
+    );
     inserted++;
   }
 

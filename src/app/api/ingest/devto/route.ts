@@ -1,3 +1,4 @@
+import { eq, and } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { tools } from "@/lib/db/schema";
 import { verifyIngestAuth } from "@/lib/ingest-utils";
@@ -20,7 +21,16 @@ export async function GET(req: Request) {
   const res = await fetch(
     "https://dev.to/api/articles?tag=ai&per_page=15&top=7",
   );
+  if (!res.ok) {
+    console.error(`[devto] API error: ${res.status} ${res.statusText}`);
+    return Response.json(
+      { ok: false, source: "devto", error: `API returned ${res.status}` },
+      { status: 502 },
+    );
+  }
   const articles: DevtoArticle[] = await res.json();
+
+  console.log(`[devto] fetched ${articles.length} articles`);
 
   let inserted = 0;
   for (const a of articles) {
@@ -30,6 +40,16 @@ export async function GET(req: Request) {
       .replace(/(^-|-$)/g, "")
       .slice(0, 200);
     const score = Math.min(100, Math.round(a.positive_reactions_count * 0.8));
+
+    const existing = await db
+      .select({ slug: tools.slug })
+      .from(tools)
+      .where(
+        and(eq(tools.sourcePlatform, "devto"), eq(tools.externalId, a.url)),
+      )
+      .limit(1);
+
+    const action = existing.length > 0 ? "UPDATE" : "INSERT";
 
     await db
       .insert(tools)
@@ -51,6 +71,7 @@ export async function GET(req: Request) {
           lastUpdatedAt: new Date(),
         },
       });
+    console.log(`[devto] ${action} | score=${score} | ${a.title.slice(0, 80)}`);
     inserted++;
   }
 
