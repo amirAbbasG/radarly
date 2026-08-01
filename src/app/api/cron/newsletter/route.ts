@@ -1,7 +1,12 @@
 import { desc, eq, isNull } from "drizzle-orm";
 import { Resend } from "resend";
+import webpush from "web-push";
 import { db } from "@/lib/db";
-import { tools, newsletterSubscribers } from "@/lib/db/schema";
+import {
+  tools,
+  newsletterSubscribers,
+  pushSubscriptions,
+} from "@/lib/db/schema";
 import { rowToTool } from "@/lib/data";
 import { buildDigest } from "@/lib/newsletter/email-template";
 
@@ -66,5 +71,62 @@ export async function GET(req: Request) {
     }
   }
 
-  return Response.json({ ok: true, sent, failed: failures.length });
+  let pushSent = 0;
+  let pushFailed = 0;
+
+  if (process.env.VAPID_PRIVATE_KEY && process.env.NEXT_PUBLIC_VAPID_KEY) {
+    webpush.setVapidDetails(
+      process.env.VAPID_SUBJECT ?? "mailto:hello@radarly.ai",
+      process.env.NEXT_PUBLIC_VAPID_KEY,
+      process.env.VAPID_PRIVATE_KEY,
+    );
+
+    const subs = await db.select().from(pushSubscriptions);
+    const pushTitle = "The Sunday Signal";
+    const pushBody = topToolNames(toolRows);
+
+    for (const sub of subs) {
+      const pushSub = {
+        endpoint: sub.endpoint,
+        keys: { p256dh: sub.p256dh, auth: sub.auth },
+      };
+      try {
+        await webpush.sendNotification(
+          pushSub,
+          JSON.stringify({
+            title: pushTitle,
+            body: pushBody,
+            url: `${baseUrl}`,
+          }),
+        );
+        pushSent++;
+      } catch (err) {
+        if (
+          err instanceof webpush.WebPushError &&
+          (err.statusCode === 410 || err.statusCode === 404)
+        ) {
+          await db
+            .delete(pushSubscriptions)
+            .where(eq(pushSubscriptions.endpoint, sub.endpoint));
+        }
+        pushFailed++;
+        console.error("push send failed", sub.endpoint, err);
+      }
+    }
+  }
+
+  return Response.json({
+    ok: true,
+    sent,
+    failed: failures.length,
+    pushSent,
+    pushFailed,
+  });
+}
+
+function topToolNames(rows: (typeof tools.$inferSelect)[]) {
+  return rows
+    .slice(0, 3)
+    .map(t => t.name)
+    .join(", ");
 }
