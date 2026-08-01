@@ -234,9 +234,48 @@ export async function GET(req: Request) {
     processed++;
   }
 
+  let rescored = 0;
+  const published = await db
+    .select()
+    .from(tools)
+    .where(eq(tools.status, "published"))
+    .orderBy(asc(tools.firstSeenAt));
+
+  for (const row of published) {
+    const hist =
+      (row.momentumHistory as { date: string; score: number }[]) ?? [];
+    const last = hist[hist.length - 1];
+    const score = row.trendingScore ?? 0;
+    // ponytail: skip append when last entry is < 6h old — avoids duplicate points from manual runs
+    if (last && Date.now() - new Date(last.date).getTime() < 6 * 3600_000) {
+      continue;
+    }
+    // no score change since last point → don't add a flat duplicate; recalc signal only
+    if (last && last.score === score) {
+      const sig = computeSignal(hist);
+      if (sig !== (row.signal ?? "steady")) {
+        await db.update(tools).set({ signal: sig }).where(eq(tools.id, row.id));
+      }
+      continue;
+    }
+    hist.push({ date: new Date().toISOString(), score });
+    const signal = computeSignal(hist.slice(-12));
+    await db
+      .update(tools)
+      .set({
+        momentumHistory: hist.slice(-12),
+        signal,
+        lastUpdatedAt: new Date(),
+      })
+      .where(eq(tools.id, row.id));
+    rescored++;
+  }
+  console.log(`[process] rescored ${rescored} published tools`);
+
   return Response.json({
     ok: true,
     processed,
+    rescored,
     geminiCount,
     mistralCount,
     fallbackCount,

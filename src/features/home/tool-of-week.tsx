@@ -3,7 +3,7 @@ import { Sparkline } from "@/components/common/sparkline";
 import { NumberTicker } from "@/components/common/number-ticker";
 import { Reveal } from "@/components/common/reveal";
 import { ToolAvatar } from "@/components/common/tool-avatar";
-import type { Tool } from "@/lib/tools-data";
+import { Tool, toolSlug } from "@/lib/tools-data";
 
 export function ToolOfWeek({ tool }: { tool: Tool | null }) {
   if (!tool) return null;
@@ -56,7 +56,7 @@ export function ToolOfWeek({ tool }: { tool: Tool | null }) {
 
               <div className="mt-8">
                 <a
-                  href="#trending"
+                  href={`/tools/${toolSlug(t.name)}`}
                   className="inline-flex items-center gap-2 rounded-xl bg-secondary px-5 py-2.5 text-sm font-semibold text-secondary-foreground transition-all hover:brightness-110 active:scale-95"
                 >
                   See why it&apos;s rising
