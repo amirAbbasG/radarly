@@ -5,6 +5,13 @@ import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
 import { getCategoryProfiles, getCategoryTools } from "@/lib/data";
 
+export async function generateStaticParams() {
+  const profiles = await getCategoryProfiles();
+  return profiles.map(profile => ({
+    slug: profile.id,
+  }));
+}
+
 export async function generateMetadata({
   params,
 }: {

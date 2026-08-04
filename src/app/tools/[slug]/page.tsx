@@ -14,6 +14,13 @@ import { getToolDetail } from "@/lib/tools-data";
 import { getToolInteractionState } from "@/app/actions/tool-interactions";
 import { auth } from "@/lib/auth";
 
+export async function generateStaticParams() {
+  const tools = await getAllTools();
+  return tools.map(tool => ({
+    slug: tool.slug,
+  }));
+}
+
 export async function generateMetadata({
   params,
 }: {
