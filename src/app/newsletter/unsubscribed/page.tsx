@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { MailX } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Unsubscribed — Radarly",
+  description:
+    "You've been unsubscribed from The Sunday Signal. No further action needed.",
+};
 
 export default function UnsubscribedPage() {
   return (
