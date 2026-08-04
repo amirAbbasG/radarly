@@ -25,6 +25,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://radarly.app"),
   title: "Radarly — Discover What's Rising in AI",
   description:
     "An AI agent scans Product Hunt, GitHub, Hacker News and Reddit every day, scores real momentum, and surfaces the AI tools that are actually taking off. Scan what matters in under 10 seconds.",
@@ -42,6 +43,13 @@ export const metadata: Metadata = {
     description:
       "The signal, not the noise. Trending AI tools ranked by real momentum, refreshed daily.",
     type: "website",
+    siteName: "Radarly",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Radarly — Discover What's Rising in AI",
+    description:
+      "The signal, not the noise. Trending AI tools ranked by real momentum, refreshed daily.",
   },
 };
 
