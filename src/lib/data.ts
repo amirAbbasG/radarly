@@ -9,16 +9,13 @@ import {
   user as userTable,
 } from "@/lib/db/schema";
 import { sourceLabel } from "@/lib/ingest-utils";
-import type {
-  Tool,
-  CategoryProfile,
-  ReviewData,
-} from "@/lib/tools-data";
+import type { Tool, CategoryProfile, ReviewData } from "@/lib/tools-data";
 import { CATEGORY_PROFILES } from "@/lib/tools-data";
 
 export function rowToTool(row: typeof tools.$inferSelect): Tool {
   const history =
     (row.momentumHistory as { date: string; score: number }[]) ?? [];
+  const sliced = history.slice(-90);
   return {
     name: row.name,
     slug: row.slug,
@@ -29,13 +26,14 @@ export function rowToTool(row: typeof tools.$inferSelect): Tool {
     score: row.trendingScore ?? 0,
     sig: (row.signal as Tool["sig"]) ?? "steady",
     spark: (() => {
-      const pts = history.map(e => e.score);
+      const pts = sliced.map(e => e.score);
       if (pts.length < 2) {
         const v = pts[0] ?? 0;
-        return [v, v]; // ponytail: flat line until 2+ entries accumulate
+        return [v, v];
       }
-      return pts.slice(-12);
+      return pts;
     })(),
+    sparkDates: sliced.map(e => e.date),
     source: sourceLabel(row.sourcePlatform),
     description: row.description ?? undefined,
     lastUpdatedAt: row.lastUpdatedAt?.toISOString(),

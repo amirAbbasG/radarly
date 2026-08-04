@@ -11,6 +11,8 @@ export type Tool = {
   sig: Signal;
   /** momentum sparkline points, 0-100 */
   spark: number[];
+  /** dates corresponding to spark points */
+  sparkDates: string[];
   /** where it was surfaced from */
   source: string;
   description?: string;

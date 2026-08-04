@@ -6,28 +6,50 @@ import { motion } from "motion/react";
 const RANGES = ["7D", "30D", "90D"] as const;
 type Range = (typeof RANGES)[number];
 
-function expandPoints(points: number[], count: number, offset: number) {
-  return Array.from({ length: count }, (_, i) => {
-    const position = (i / Math.max(1, count - 1)) * (points.length - 1);
-    const left = Math.floor(position);
-    const right = Math.min(points.length - 1, left + 1);
-    const mix = position - left;
-    const base = points[left] * (1 - mix) + points[right] * mix;
-    const wave =
-      Math.sin(i * 1.7 + offset) * 3 + Math.cos(i * 0.57 + offset) * 2;
-    return Math.max(4, Math.min(100, Math.round(base + wave)));
-  });
+function filterByRange(points: number[], dates: string[], range: Range) {
+  const now = Date.now();
+  const cutoff =
+    range === "7D"
+      ? now - 7 * 86400_000
+      : range === "30D"
+        ? now - 30 * 86400_000
+        : now - 90 * 86400_000;
+  const filtered: { value: number; date: string }[] = [];
+  for (let i = 0; i < points.length; i++) {
+    const d = dates[i] ? new Date(dates[i]).getTime() : 0;
+    if (d >= cutoff) {
+      filtered.push({ value: points[i], date: dates[i] });
+    }
+  }
+  // always include at least the last point
+  if (filtered.length === 0) {
+    filtered.push({
+      value: points[points.length - 1],
+      date: dates[dates.length - 1],
+    });
+  }
+  return filtered;
 }
 
-export function MomentumChart({ points }: { points: number[] }) {
+function formatDate(iso: string) {
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+export function MomentumChart({
+  points,
+  dates,
+}: {
+  points: number[];
+  dates: string[];
+}) {
   const [range, setRange] = useState<Range>("30D");
   const [hovered, setHovered] = useState<number | null>(null);
 
-  const data = useMemo(() => {
-    if (range === "7D") return expandPoints(points.slice(-6), 7, 1);
-    if (range === "90D") return expandPoints(points, 20, 4);
-    return expandPoints(points, 14, 2);
-  }, [points, range]);
+  const data = useMemo(
+    () => filterByRange(points, dates, range),
+    [points, dates, range],
+  );
 
   const width = 800;
   const height = 280;
@@ -35,13 +57,15 @@ export function MomentumChart({ points }: { points: number[] }) {
   const padY = 24;
   const innerW = width - padX * 2;
   const innerH = height - padY * 2;
-  const min = Math.min(...data) - 6;
-  const max = Math.max(...data) + 6;
+  const values = data.map(d => d.value);
+  const min = Math.min(...values) - 6;
+  const max = Math.max(...values) + 6;
   const rangeY = Math.max(1, max - min);
-  const coords = data.map((value, i) => ({
-    value,
+  const coords = data.map((d, i) => ({
+    value: d.value,
+    date: d.date,
     x: padX + (i / Math.max(1, data.length - 1)) * innerW,
-    y: padY + innerH - ((value - min) / rangeY) * innerH,
+    y: padY + innerH - ((d.value - min) / rangeY) * innerH,
   }));
   const line = coords.map((p, i) => `${i ? "L" : "M"}${p.x},${p.y}`).join(" ");
   const area = `${line} L${coords.at(-1)?.x},${height - padY} L${padX},${height - padY} Z`;
@@ -61,6 +85,11 @@ export function MomentumChart({ points }: { points: number[] }) {
               momentum index
             </span>
           </div>
+          {activePoint.date && (
+            <div className="mt-0.5 text-[11px] text-muted-foreground">
+              {formatDate(activePoint.date)}
+            </div>
+          )}
         </div>
         <div
           className="flex rounded-lg border border-border bg-muted p-1"
@@ -90,7 +119,7 @@ export function MomentumChart({ points }: { points: number[] }) {
           viewBox={`0 0 ${width} ${height}`}
           className="h-64 w-full overflow-visible"
           role="img"
-          aria-label={`${range} momentum chart ending at ${data.at(-1)}`}
+          aria-label={`${range} momentum chart ending at ${data.at(-1)?.value}`}
           preserveAspectRatio="none"
           onMouseLeave={() => setHovered(null)}
         >
@@ -178,11 +207,13 @@ export function MomentumChart({ points }: { points: number[] }) {
         </svg>
         <div className="mt-1 flex items-center justify-between px-1 text-[11px] text-muted-foreground">
           <span>
-            {range === "7D"
-              ? "7 days ago"
-              : range === "30D"
-                ? "30 days ago"
-                : "90 days ago"}
+            {coords.length > 0
+              ? formatDate(coords[0].date)
+              : range === "7D"
+                ? "7 days ago"
+                : range === "30D"
+                  ? "30 days ago"
+                  : "90 days ago"}
           </span>
           <span>Today</span>
         </div>

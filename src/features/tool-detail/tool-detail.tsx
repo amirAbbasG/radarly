@@ -455,7 +455,7 @@ export function ToolDetail({
                 </span>
               </div>
               <div className="mt-4">
-                <MomentumChart points={tool.spark} />
+                <MomentumChart points={tool.spark} dates={tool.sparkDates} />
               </div>
             </div>
           </Section>

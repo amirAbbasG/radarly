@@ -1,8 +1,0 @@
-﻿Task 1: complete (commits f91d259..2b6480a, review clean)
-Task 2: complete (commits 2b6480a..6597a40, scope creep was necessary Tool type alignment)
-Task 3: complete (commits 6597a40..0451d48, review clean)
-Task 4: complete (commits 0451d48..7f70ba9, review clean, tool-detail.tsx changes correct)
-Task 5: complete (commits 7f70ba9..8269935, review clean)
-Task 6: complete (commits 8269935..9367041, review clean)
-Task 7: complete (commits 9367041..053a7cc, review clean)
-Fix wave: complete (commit b4e164b, migration + null assertions fixed)

@@ -222,7 +222,7 @@ export async function GET(req: Request) {
         tags: tags ?? undefined,
         website: website ?? undefined,
         signal,
-        momentumHistory: history,
+        momentumHistory: history.slice(-90),
         status: "published",
         lastUpdatedAt: new Date(),
       })
@@ -246,8 +246,8 @@ export async function GET(req: Request) {
       (row.momentumHistory as { date: string; score: number }[]) ?? [];
     const last = hist[hist.length - 1];
     const score = row.trendingScore ?? 0;
-    // ponytail: skip append when last entry is < 6h old — avoids duplicate points from manual runs
-    if (last && Date.now() - new Date(last.date).getTime() < 6 * 3600_000) {
+    // ponytail: skip append when last entry is < 1h old — avoids duplicate points from manual runs
+    if (last && Date.now() - new Date(last.date).getTime() < 3600_000) {
       continue;
     }
     // no score change since last point → don't add a flat duplicate; recalc signal only
@@ -259,11 +259,11 @@ export async function GET(req: Request) {
       continue;
     }
     hist.push({ date: new Date().toISOString(), score });
-    const signal = computeSignal(hist.slice(-12));
+    const signal = computeSignal(hist.slice(-90));
     await db
       .update(tools)
       .set({
-        momentumHistory: hist.slice(-12),
+        momentumHistory: hist.slice(-90),
         signal,
         lastUpdatedAt: new Date(),
       })
