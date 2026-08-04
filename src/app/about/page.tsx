@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: "About Radarly — The Signal Behind the AI Radar",
   description:
     "Learn how Radarly tracks, scores, and ranks emerging AI tools using transparent momentum signals from across the builder ecosystem.",
+  alternates: {
+    canonical: "https://radarly.app/about",
+  },
   openGraph: {
     title: "About Radarly — The Signal Behind the AI Radar",
     description:

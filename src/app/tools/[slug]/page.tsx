@@ -82,12 +82,11 @@ export default async function ToolPage({
     name: tool.name,
     description: tool.hook,
     url: tool.website,
-    applicationCategory: "AI Tool",
-    offers: {
-      "@type": "Offer",
-      price: detail.pricing === "Free" ? "0" : undefined,
-      priceCurrency: "USD",
-    },
+    applicationCategory: "WebApplication",
+    offers:
+      detail.pricing === "Free"
+        ? { "@type": "Offer", price: "0", priceCurrency: "USD" }
+        : undefined,
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: tool.score,
