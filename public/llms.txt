@@ -1,0 +1,37 @@
+# Radarly
+
+> Radarly is an AI-powered tool discovery platform that scans Product Hunt, GitHub, Hacker News, and Reddit daily to rank emerging AI tools by real momentum.
+
+## What We Do
+
+Radarly tracks AI tools across four source platforms every 24 hours. Each tool receives a momentum score (0-100) based on discussion volume, velocity of mentions, community engagement, and retention signals. Tools are ranked and categorized so builders can discover what's actually taking off — not just what launched yesterday.
+
+## Key Pages
+
+- [Home](https://radarly.app) — Trending AI tools ranked by momentum
+- [About](https://radarly.app/about) — How Radarly works, methodology, FAQ
+- [Categories](https://radarly.app/categories/code-development) — Browse tools by category
+- [Submit a Tool](https://radarly.app/submit) — Nominate an AI product for review
+- [Contact](https://radarly.app/contact) — Get in touch
+
+## Categories
+
+- Code & Development — Editors, agents, and infrastructure changing how software gets shipped
+- Writing & Content — Research and creation tools that help ideas travel further
+- Design & Creative — Visual systems and generative tools for faster creative direction
+- Productivity — Focused assistants that remove friction from everyday knowledge work
+- Data & Analytics — Models and analysis layers that turn raw information into decisions
+- Marketing & SEO — Discovery, research, and campaign tools finding measurable demand
+- Image Generation — Image models and visual workflows moving from prompt to production
+- Video & Audio — Voice, music, and motion tools reshaping media production
+
+## Data Sources
+
+- Product Hunt — Product launches and upvotes
+- GitHub — Repository activity and stars
+- Hacker News — Discussion and engagement
+- Reddit — Community conversation and mentions
+
+## Contact
+
+For questions, partnerships, or bug reports: https://radarly.app/contact
