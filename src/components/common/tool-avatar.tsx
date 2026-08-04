@@ -51,7 +51,7 @@ export function ToolAvatar({
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={logo ?? faviconUrl(website)}
-          alt=""
+          alt={name}
           className="absolute inset-0 h-full w-full object-cover"
           onError={e => {
             (e.target as HTMLImageElement).style.display = "none";
